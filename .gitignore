@@ -1,0 +1,13 @@
+.*
+*.class
+*.swp
+*.*~
+output
+build
+worldtree
+
+!src
+!.gitignore
+!CHANGES
+
+build.properties
