@@ -12,7 +12,6 @@ public class Dictionary extends HashMap<String, String> {
 	private static final int MIN_WORD_LENGTH = 4;
 	
 	private Map<Integer, List<String>> wordLengthMap;
-	private Random random;
 	private List<String> keys;
 	
 	public Dictionary() {
@@ -21,16 +20,22 @@ public class Dictionary extends HashMap<String, String> {
 	
 	public Dictionary(int size) {
 		super(size);
-		random			= new Random();
 		keys			= new ArrayList<String>(size);
 		wordLengthMap	= new HashMap<Integer, List<String>>();
 	}
 	
 	public String generateWord(int maxWordLength) {
 //		XXX:We assume that there is bound to be a word of every length from MIN_WORD_LENGTH to MAX_WORD_LENGTH
-		int wordLength = MIN_WORD_LENGTH + random.nextInt(maxWordLength - MIN_WORD_LENGTH + 1);
-		int mapSize = wordLengthMap.get(wordLength).size();
-		int randomIndex = random.nextInt(mapSize);
+		int wordLength = -1;
+		int mapSize = -1;
+		while(mapSize <= 0) {
+			wordLength			= MIN_WORD_LENGTH + (int)(Math.random() *(maxWordLength - MIN_WORD_LENGTH + 1));
+			List<String> list	= wordLengthMap.get(wordLength);
+			if(list != null)
+				mapSize				= list.size();
+		}
+		
+		int randomIndex = 0 + (int)(Math.random() *mapSize);
 		
 		return wordLengthMap.get(wordLength).get(randomIndex);
 	}
