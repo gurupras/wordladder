@@ -14,7 +14,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public class DictParser {
+public class DictionaryParser {
 	public static final String dictPath				= "libs/dictionary/";
 	private static Pattern dictionaryPattern		= Pattern.compile("(\\w+)\\s+\\(.*\\)\\s(.*)");
 	private static Map<String, String> dictionary	= new HashMap<String, String>(100000);

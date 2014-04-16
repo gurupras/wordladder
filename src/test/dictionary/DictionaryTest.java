@@ -3,7 +3,6 @@ package test.dictionary;
 import static org.junit.Assert.*;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Map;
 
@@ -11,8 +10,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.games.wordladder.DictParser;
-import com.games.wordladder.DictParser.DictionaryPatternException;
+import com.games.wordladder.DictionaryParser;
 
 public class DictionaryTest {
 	private static StringBuffer result = null;
@@ -33,8 +31,8 @@ public class DictionaryTest {
 		StringBuffer errorBuffer = new StringBuffer();
 		boolean failed = false;
 		try {
-			DictParser.init();
-		} catch(DictionaryPatternException e) {
+			DictionaryParser.init();
+		} catch(com.games.wordladder.DictionaryParser.DictionaryPatternException e) {
 			errorBuffer.append("Warning: Dictionary pattern failed to match all lines\n\t");
 			if(verbose)
 				errorBuffer.append(e.getMessage());
@@ -60,8 +58,8 @@ public class DictionaryTest {
 		
 //		First check whether we're able to initialize the dictionary
 		try {
-			DictParser.init();
-		} catch(DictionaryPatternException e) {
+			DictionaryParser.init();
+		} catch(com.games.wordladder.DictionaryParser.DictionaryPatternException e) {
 			errorBuffer.append("Warning: Dictionary pattern failed to match all lines\n\t");
 			if(verbose)
 				errorBuffer.append(e.getMessage());
@@ -75,22 +73,22 @@ public class DictionaryTest {
 		
 //		Now do the actual SerDe
 		else {
-			Map<String, String> dictionary = DictParser.getDictionary();
+			Map<String, String> dictionary = DictionaryParser.getDictionary();
 			try {
-				DictParser.storeDictionary("test.dict");
+				DictionaryParser.storeDictionary("test.dict");
 			} catch(IOException e) {
 				failed = true;
 				errorBuffer.append(e.getMessage());
 			}
 			if(!failed) {
 				try {
-					DictParser.loadDictionary("test.dict");
+					DictionaryParser.loadDictionary("test.dict");
 				} catch (Exception e) {
 					failed = true;
 					errorBuffer.append(e.getMessage());
 				}
 				if(!failed) {
-					Map<String, String> newDictionary = DictParser.getDictionary();
+					Map<String, String> newDictionary = DictionaryParser.getDictionary();
 					for(Map.Entry<String, String> entry : dictionary.entrySet()) {
 						String key = entry.getKey();
 						String value = entry.getValue();
