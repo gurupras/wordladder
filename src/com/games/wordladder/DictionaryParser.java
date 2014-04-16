@@ -8,18 +8,21 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
 public class DictionaryParser {
-	public static final String dictPath				= "libs/dictionary/";
-	private static Pattern dictionaryPattern		= Pattern.compile("(\\w+)\\s+\\(.*\\)\\s(.*)");
-	private static Map<String, String> dictionary	= new HashMap<String, String>(100000);
-
-	public static boolean init() throws DictionaryNotFound, DictionaryPatternException {
+	private static final String dictPath		= "libs/dictionary/";
+	private static Pattern dictionaryPattern	= Pattern.compile("(\\w+)\\s+\\(.*\\)\\s(.*)");
+	private static Dictionary dictionary		= null;
+	
+	private static boolean init() throws DictionaryNotFound, DictionaryPatternException {
+		dictionary = new Dictionary();
 		boolean succeeded = true;
 		StringBuffer errorBuffer = new StringBuffer();
 		File file = new File(dictPath);
@@ -64,7 +67,7 @@ public class DictionaryParser {
 		}
 		return succeeded;
 	}
-	
+
 	public static void storeDictionary(String filePath) throws FileNotFoundException, IOException {
 		File file = new File(filePath);
 		if(file.exists())
@@ -79,7 +82,7 @@ public class DictionaryParser {
 		File file = new File(filePath);
 		ObjectInputStream out = null;
 		out = new ObjectInputStream(new FileInputStream(file));
-		dictionary = (Map<String, String>) out.readObject();
+		dictionary = (Dictionary) out.readObject();
 		out.close();
 	}
 	
@@ -96,7 +99,9 @@ public class DictionaryParser {
 		}
 	}
 
-	public static Map<String, String> getDictionary() {
+	public static Dictionary getDictionary() throws DictionaryNotFound, DictionaryPatternException {
+		if(dictionary == null)
+			init();
 		return dictionary;
 	}
 }

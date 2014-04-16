@@ -10,7 +10,10 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.games.wordladder.Dictionary;
 import com.games.wordladder.DictionaryParser;
+import com.games.wordladder.DictionaryParser.DictionaryNotFound;
+import com.games.wordladder.DictionaryParser.DictionaryPatternException;
 
 public class DictionaryTest {
 	private static StringBuffer result = null;
@@ -31,11 +34,12 @@ public class DictionaryTest {
 		StringBuffer errorBuffer = new StringBuffer();
 		boolean failed = false;
 		try {
-			DictionaryParser.init();
+			DictionaryParser.getDictionary();
 		} catch(com.games.wordladder.DictionaryParser.DictionaryPatternException e) {
-			errorBuffer.append("Warning: Dictionary pattern failed to match all lines\n\t");
-			if(verbose)
+			if(verbose) {
+				errorBuffer.append("Warning: Dictionary pattern failed to match all lines\n\t");
 				errorBuffer.append(e.getMessage());
+			}
 		} catch(Exception e) {
 			failed = true;
 			errorBuffer.append(e.getMessage());
@@ -52,17 +56,19 @@ public class DictionaryTest {
 	
 	@Test
 	public void dictionarySerializationTest() {
-		StringBuffer localBuffer = new StringBuffer("Test whether dictionary serialization works             :");
-		StringBuffer errorBuffer = new StringBuffer();
-		boolean failed = false;
-		
+		StringBuffer localBuffer 	= new StringBuffer("Test whether dictionary serialization works             :");
+		StringBuffer errorBuffer 	= new StringBuffer();
+		Dictionary dictionary	 	= null;
+		boolean failed				= false;
+
 //		First check whether we're able to initialize the dictionary
 		try {
-			DictionaryParser.init();
+			dictionary = DictionaryParser.getDictionary();
 		} catch(com.games.wordladder.DictionaryParser.DictionaryPatternException e) {
-			errorBuffer.append("Warning: Dictionary pattern failed to match all lines\n\t");
-			if(verbose)
+			if(verbose) {
+				errorBuffer.append("Warning: Dictionary pattern failed to match all lines\n\t");
 				errorBuffer.append(e.getMessage());
+			}
 		} catch(Exception e) {
 			failed = true;
 			errorBuffer.append(e.getMessage());
@@ -73,7 +79,6 @@ public class DictionaryTest {
 		
 //		Now do the actual SerDe
 		else {
-			Map<String, String> dictionary = DictionaryParser.getDictionary();
 			try {
 				DictionaryParser.storeDictionary("test.dict");
 			} catch(IOException e) {
@@ -88,24 +93,35 @@ public class DictionaryTest {
 					errorBuffer.append(e.getMessage());
 				}
 				if(!failed) {
-					Map<String, String> newDictionary = DictionaryParser.getDictionary();
-					for(Map.Entry<String, String> entry : dictionary.entrySet()) {
-						String key = entry.getKey();
-						String value = entry.getValue();
-						if(!newDictionary.containsKey(key) || !newDictionary.get(key).equals(value)) {
-							failed = true;
-							errorBuffer.append("Serialized dictionary != deserialized dictionary");
-							break;
-						}
+					Dictionary newDictionary = null;
+					try {
+						newDictionary = DictionaryParser.getDictionary();
+					} catch (DictionaryNotFound e) {
+						failed = true;
+						errorBuffer.append(e.getMessage());
+					} catch (DictionaryPatternException e) {
+						failed = true;
+						errorBuffer.append(e.getMessage());
 					}
 					if(!failed) {
-						for(Map.Entry<String, String> entry : newDictionary.entrySet()) {
+						for(Map.Entry<String, String> entry : dictionary.entrySet()) {
 							String key = entry.getKey();
 							String value = entry.getValue();
-							if(!dictionary.containsKey(key) || !dictionary.get(key).equals(value)) {
+							if(!newDictionary.containsKey(key) || !newDictionary.get(key).equals(value)) {
 								failed = true;
 								errorBuffer.append("Serialized dictionary != deserialized dictionary");
 								break;
+							}
+						}
+						if(!failed) {
+							for(Map.Entry<String, String> entry : newDictionary.entrySet()) {
+								String key = entry.getKey();
+								String value = entry.getValue();
+								if(!dictionary.containsKey(key) || !dictionary.get(key).equals(value)) {
+									failed = true;
+									errorBuffer.append("Serialized dictionary != deserialized dictionary");
+									break;
+								}
 							}
 						}
 					}
