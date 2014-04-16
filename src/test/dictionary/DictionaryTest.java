@@ -35,7 +35,7 @@ public class DictionaryTest {
 		boolean failed = false;
 		try {
 			DictionaryParser.getDictionary();
-		} catch(com.games.wordladder.DictionaryParser.DictionaryPatternException e) {
+		} catch(DictionaryPatternException e) {
 			if(verbose) {
 				errorBuffer.append("Warning: Dictionary pattern failed to match all lines\n\t");
 				errorBuffer.append(e.getMessage());
@@ -64,7 +64,7 @@ public class DictionaryTest {
 //		First check whether we're able to initialize the dictionary
 		try {
 			dictionary = DictionaryParser.getDictionary();
-		} catch(com.games.wordladder.DictionaryParser.DictionaryPatternException e) {
+		} catch(DictionaryPatternException e) {
 			if(verbose) {
 				errorBuffer.append("Warning: Dictionary pattern failed to match all lines\n\t");
 				errorBuffer.append(e.getMessage());
