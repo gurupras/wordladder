@@ -60,7 +60,7 @@ public class DictionaryParser {
 						continue;
 					}
 //					We have a word..add it to the dictionary
-					String word = m.group(1);
+					String word = m.group(1).toLowerCase();
 					String defn = m.group(2);
 					dictionary.put(word, defn);
 				}
