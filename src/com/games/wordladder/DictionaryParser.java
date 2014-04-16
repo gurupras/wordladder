@@ -47,8 +47,6 @@ public class DictionaryParser {
 						continue;
 					}
 					String word = m.group(1);
-					if(word.length() <= 3)
-						continue;
 					String defn = m.group(2);
 					dictionary.put(word, defn);
 				}
