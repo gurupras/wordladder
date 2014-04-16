@@ -1,7 +1,5 @@
 package test.dictionary;
 
-import static org.junit.Assert.*;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
@@ -12,7 +10,6 @@ import org.junit.Test;
 
 import com.games.wordladder.Dictionary;
 import com.games.wordladder.DictionaryParser;
-import com.games.wordladder.DictionaryParser.DictionaryNotFound;
 import com.games.wordladder.DictionaryParser.DictionaryPatternException;
 
 public class DictionaryTest {
@@ -34,7 +31,7 @@ public class DictionaryTest {
 		StringBuffer errorBuffer = new StringBuffer();
 		boolean failed = false;
 		try {
-			DictionaryParser.getDictionary();
+			DictionaryParser.init();
 		} catch(DictionaryPatternException e) {
 			if(verbose) {
 				errorBuffer.append("Warning: Dictionary pattern failed to match all lines\n\t");
@@ -63,6 +60,7 @@ public class DictionaryTest {
 
 //		First check whether we're able to initialize the dictionary
 		try {
+			DictionaryParser.init();
 			dictionary = DictionaryParser.getDictionary();
 		} catch(DictionaryPatternException e) {
 			if(verbose) {
@@ -94,15 +92,7 @@ public class DictionaryTest {
 				}
 				if(!failed) {
 					Dictionary newDictionary = null;
-					try {
-						newDictionary = DictionaryParser.getDictionary();
-					} catch (DictionaryNotFound e) {
-						failed = true;
-						errorBuffer.append(e.getMessage());
-					} catch (DictionaryPatternException e) {
-						failed = true;
-						errorBuffer.append(e.getMessage());
-					}
+					newDictionary = DictionaryParser.getDictionary();
 					if(!failed) {
 						for(Map.Entry<String, String> entry : dictionary.entrySet()) {
 							String key = entry.getKey();

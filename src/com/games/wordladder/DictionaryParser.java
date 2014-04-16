@@ -8,10 +8,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,9 +33,8 @@ public class DictionaryParser {
 	 * @throws DictionaryNotFound if {@link #dictPath} does not exist
 	 * @throws DictionaryPatternException if the {@link #dictionaryPattern} did not match all lines in the dictionary files
 	 */
-	private static boolean init() throws DictionaryNotFound, DictionaryPatternException {
+	public static void init() throws DictionaryNotFound, DictionaryPatternException {
 		Dictionary dictionary = new Dictionary();
-		boolean succeeded = true;
 		StringBuffer errorBuffer = new StringBuffer();
 		File file = new File(dictPath);
 		
@@ -59,7 +54,6 @@ public class DictionaryParser {
 						continue;
 					Matcher m = dictionaryPattern.matcher(line);
 					if(!m.matches()) {
-						succeeded = false;
 						errorBuffer.append("Line did not match pattern\n" +
 								"File :" + f.getName() + "\n" +
 								"Line :" + line);
@@ -81,14 +75,13 @@ public class DictionaryParser {
 			}
 		}
 		
+//		At this point, we can't fail. So set DictionaryParser.dictionary to the dictionary we just built.
+		DictionaryParser.dictionary = dictionary;
+		
 		if(errorBuffer.length() > 0) {
 //			We had some errors while parsing..throw the pattern exception
 			throw new DictionaryPatternException(errorBuffer.toString());
 		}
-		
-//		At this point, we can't fail. So set DictionaryParser.dictionary to the dictionary we just built.
-		DictionaryParser.dictionary = dictionary;
-		return succeeded;
 	}
 
 	/**
@@ -149,9 +142,7 @@ public class DictionaryParser {
 	 * @throws DictionaryNotFound if the dictionary file(s) were not found
 	 * @throws DictionaryPatternException if the {@link #dictionaryPattern} did not match all lines in the dictionary files
 	 */
-	public static Dictionary getDictionary() throws DictionaryNotFound, DictionaryPatternException {
-		if(dictionary == null)
-			init();
+	public static Dictionary getDictionary() {
 		return dictionary;
 	}
 }
