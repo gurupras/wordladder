@@ -6,6 +6,8 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import test.TimeKeeper;
+
 import com.games.wordladder.DictionaryParser;
 import com.games.wordladder.Difficulty;
 import com.games.wordladder.WordLadder;
@@ -32,10 +34,20 @@ public class WordLadderTest {
 		StringBuffer errorBuffer = new StringBuffer();
 		boolean failed = false;
 		
+		TimeKeeper timeKeeper = new TimeKeeper();
 		try {
+			timeKeeper.start();
 			new WordLadder(Difficulty.EASY);
+			timeKeeper.stop();
+			System.out.println("Time Taken :" + timeKeeper.toString());
+			timeKeeper.start();
 			new WordLadder(Difficulty.MEDIUM);
+			timeKeeper.stop();
+			System.out.println("Time Taken :" + timeKeeper.toString());
+			timeKeeper.start();
 			new WordLadder(Difficulty.HARD);
+			timeKeeper.stop();
+			System.out.println("Time Taken :" + timeKeeper.toString());
 		} catch(Exception e) {
 			failed = true;
 			errorBuffer.append(e.getMessage());
