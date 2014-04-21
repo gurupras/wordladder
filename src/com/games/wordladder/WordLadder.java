@@ -1,10 +1,14 @@
 package com.games.wordladder;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 
 public class WordLadder {
 	private Difficulty difficulty;
@@ -18,35 +22,69 @@ public class WordLadder {
 		dictionary 			= DictionaryParser.getDictionary();
 		assert(dictionary != null);
 
-		Map<String, Collection<String>> validDestinations = new HashMap<String, Collection<String>>();
-		while(validDestinations.size() < 1) {
+//		Map<String, Collection<String>> validDestinations = new HashMap<String, Collection<String>>();
+//		while(validDestinations.size() < 1) {
+//			this.origin			= dictionary.generateWord(maxWordLength);
+//			getDestinations(origin, origin, 0, difficulty.getMaxSteps(), difficulty, validDestinations, null);
+//		}
+		Collection<String> destinationList = new LinkedList<String>();
+		Map<String, Collection<String>> pathMap = new HashMap<String,Collection<String>>();
+		while(destinationList.size() < 1) {
+			destinationList.clear();
+			pathMap.clear();
 			this.origin			= dictionary.generateWord(maxWordLength);
-			getDestinations(origin, origin, 0, difficulty.getMaxSteps(), difficulty, validDestinations, null);
+			getDestinations(origin, difficulty.getMaxSteps(), destinationList, pathMap);
 		}
-		int randomIndex		= (int) (0 + Math.random() * validDestinations.size());
-		this.destination	= (String) validDestinations.keySet().toArray()[randomIndex];
+		
+		int randomIndex		= (int) (0 + Math.random() * destinationList.size());
+		this.destination	= (String) destinationList.toArray()[randomIndex];
 		
 	}
 
-	private void getDestinations(String origin, String current, int arrayIdx, int steps, Difficulty difficulty, Map<String, Collection<String>> result, Collection<String> stack) {
-		if(steps <= difficulty.getMinSteps()) {
-			assert(dictionary.containsKey(current));
-			result.put(current, stack);
-			if(steps == 0)
-				return;
-		}
-		char[] array = origin.toLowerCase().toCharArray();
-		for(; arrayIdx < array.length; arrayIdx++) {
-			char arrayChar	= array[arrayIdx];
-			char permute	= 'a';
-			while(permute <= 'z') {
-				if(permute != arrayChar) {
-					array[arrayIdx] = permute;
-					String permutation = String.copyValueOf(array);
-					getDestinations(origin, permutation, arrayIdx + 1, steps - 1, difficulty, result, new LinkedHashSet<String>());
+	private void getDestinations(String origin, int maxSteps, Collection<String> destinationList, Map<String,Collection<String>> pathMap) {
+		Set<String> visited = new HashSet<String>();
+		visited.add(origin);
+		Queue<String> q = new LinkedList<String>();
+		q.add(origin);
+		int stepsTaken = 0;
+		while(!q.isEmpty()) {
+			String word = q.poll();
+			char[] wArray = word.toCharArray();
+			Set<String> adjWords = new HashSet<String>();
+			for(int i = 0; i < wArray.length; i++) {
+				char[] wCopy = Arrays.copyOf(wArray, wArray.length);
+				for(char ch = 'a'; ch <= 'z'; ch++) {
+					if(wArray[i] != ch) {
+						wCopy[i] = ch;
+						String perm = String.copyValueOf(wCopy);
+						if(dictionary.containsKey(perm) && !visited.contains(perm)) {
+							adjWords.add(perm);
+						}
+					}
 				}
 			}
+			stepsTaken++;
+			for(String s : adjWords) {
+				if(dictionary.containsKey(s) && !visited.contains(s)) {
+					if(stepsTaken == maxSteps) {
+						destinationList.add(s);
+					}
+					visited.add(s);
+					q.add(s);
+					Collection<String> list = pathMap.get(word);
+					if(list == null) {
+						 list = new LinkedList<String>();
+					}
+					list.add(s);
+					pathMap.put(word, list);
+				}
+			}
+			if(stepsTaken == maxSteps) {
+				break;
+			}
 		}
+		
 	}
+	
 }
 	
