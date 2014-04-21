@@ -34,20 +34,15 @@ public class WordLadderTest {
 		StringBuffer errorBuffer = new StringBuffer();
 		boolean failed = false;
 		
-		TimeKeeper timeKeeper = new TimeKeeper();
+		TimeKeeper timeKeeper	= new TimeKeeper();
+		StringBuffer timeSB		= new StringBuffer();
 		try {
-			timeKeeper.start();
-			new WordLadder(Difficulty.EASY);
-			timeKeeper.stop();
-			System.out.println("Time Taken :" + timeKeeper.toString());
-			timeKeeper.start();
-			new WordLadder(Difficulty.MEDIUM);
-			timeKeeper.stop();
-			System.out.println("Time Taken :" + timeKeeper.toString());
-			timeKeeper.start();
-			new WordLadder(Difficulty.HARD);
-			timeKeeper.stop();
-			System.out.println("Time Taken :" + timeKeeper.toString());
+			for(Difficulty d : Difficulty.values()) {
+				timeKeeper.start();
+				new WordLadder(d);
+				timeKeeper.stop();
+				timeSB.append("Difficulty :" + d + "\tTime Taken :" + timeKeeper.toString() + "\n");
+			}
 		} catch(Exception e) {
 			failed = true;
 			errorBuffer.append(e.getMessage());
@@ -55,8 +50,10 @@ public class WordLadderTest {
 		}
 		if(failed)
 			localBuffer.append("Failed\n");
-		else
+		else {
 			localBuffer.append("Passed\n");
+			localBuffer.append(timeSB.toString());
+		}
 		localBuffer.append("\t" + errorBuffer + "\n");
 		result.append(localBuffer.toString());
 	}
