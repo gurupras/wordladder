@@ -94,6 +94,39 @@ public class WordLadder {
 		}
 		
 	}
+
+	public String origin() {
+		return origin;
+	}
 	
+	public String destination() {
+		return destination;
+	}
+	
+	public Difficulty difficulty() {
+		return difficulty;
+	}
+	
+	public Dictionary dictionary() {
+		return dictionary;
+	}
+	
+	public static int hammingDistance(String word1, String word2) {
+		if(word1.length() != word2.length()) {
+			throw new IllegalArgumentException("Word lengths do not match!\n"
+					+ word1 + " " + word2);
+		}
+
+		int hammingDistance = 0;
+		char[] wordArray1 = word1.toCharArray();
+		char[] wordArray2 = word2.toCharArray();
+
+		for(int idx = 0; idx < word1.length(); idx++) {
+			if(wordArray1[idx] != wordArray2[idx])
+				hammingDistance++;
+		}
+		return hammingDistance;
+	}
+
 }
 	
