@@ -33,7 +33,7 @@ public class WordLadder {
 			destinationList.clear();
 			pathMap.clear();
 			this.origin			= dictionary.generateWord(maxWordLength);
-			getDestinations(origin, difficulty, destinationList, pathMap);
+			getDestinations(origin, difficulty.getMaxSteps(), destinationList, pathMap);
 		}
 		
 		int randomIndex		= (int) (0 + Math.random() * destinationList.size());
@@ -41,15 +41,12 @@ public class WordLadder {
 		
 	}
 
-	private void getDestinations(String origin, Difficulty difficulty, Collection<String> destinationList, Map<String,Collection<String>> pathMap) {
+	private void getDestinations(String origin, int maxSteps, Collection<String> destinationList, Map<String,Collection<String>> pathMap) {
 		Set<String> visited = new HashSet<String>();
 		visited.add(origin);
 		Queue<String> q = new LinkedList<String>();
 		q.add(origin);
-		pathMap.put(origin, new LinkedList<String>());
 		int stepsTaken = 0;
-		int parentStepSize = 1;
-		int childStepSize = 0;
 		while(!q.isEmpty()) {
 			String word = q.poll();
 			char[] wArray = word.toCharArray();
@@ -66,16 +63,20 @@ public class WordLadder {
 					}
 				}
 			}
-			parentStepSize--;
-			childStepSize += adjWords.size();
-			if(parentStepSize == 0) {
-				stepsTaken++;
-				parentStepSize = childStepSize;
-				childStepSize = 0;
-			}
+			stepsTaken++;
 			for(String s : adjWords) {
-				if(stepsTaken >= difficulty.getMinSteps()){
-					destinationList.add(s);
+				if(dictionary.containsKey(s) && !visited.contains(s)) {
+					if(stepsTaken == maxSteps) {
+						destinationList.add(s);
+					}
+					visited.add(s);
+					q.add(s);
+					Collection<String> list = pathMap.get(word);
+					if(list == null) {
+						 list = new LinkedList<String>();
+					}
+					list.add(s);
+					pathMap.put(word, list);
 				}
 				visited.add(s);
 				q.add(s);
@@ -85,6 +86,9 @@ public class WordLadder {
 				pathMap.put(s, list);
 			}
 			if(stepsTaken == difficulty.getMaxSteps()) {
+				break;
+			}
+			if(stepsTaken == maxSteps) {
 				break;
 			}
 		}
