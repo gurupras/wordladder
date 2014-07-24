@@ -11,6 +11,12 @@ public class TimeKeeper {
 	private long endTime;
 	private long timeInNS;
 	
+	public TimeKeeper() {
+	}
+
+	public TimeKeeper(long nanoseconds) {
+		this.timeInNS = nanoseconds;
+	}
 	/**
 	 * Obtain time taken in nanoseconds <br>
 	 * Logic is (end-time - start-time) <br>	
