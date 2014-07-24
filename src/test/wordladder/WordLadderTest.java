@@ -35,13 +35,15 @@ public class WordLadderTest {
 		boolean failed = false;
 		
 		TimeKeeper timeKeeper	= new TimeKeeper();
-		StringBuffer timeSB		= new StringBuffer();
+		StringBuffer logSB		= new StringBuffer();
 		try {
 			for(Difficulty d : Difficulty.values()) {
+				logSB.append("Difficulty :" + d + "\n");
 				timeKeeper.start();
-				new WordLadder(d);
+				WordLadder wl = new WordLadder(d);
+				logSB.append("\t" + wl.getPath() + "\n");
 				timeKeeper.stop();
-				timeSB.append("Difficulty :" + d + "\tTime Taken :" + timeKeeper.toString() + "\n");
+				logSB.append("\tTime Taken :" + timeKeeper.toString() + "\n");
 			}
 		} catch(Exception e) {
 			failed = true;
@@ -52,10 +54,17 @@ public class WordLadderTest {
 			localBuffer.append("Failed\n");
 		else {
 			localBuffer.append("Passed\n");
-			localBuffer.append(timeSB.toString());
+			localBuffer.append(logSB.toString());
 		}
 		localBuffer.append("\t" + errorBuffer + "\n");
 		result.append(localBuffer.toString());
 	}
 
+	@Test
+	public void pathTest() {
+		String origin = "hand";
+		String destination = "sane";
+		WordLadder wl = new WordLadder(origin, destination);
+		System.out.println(wl.getPath());
+	}
 }
