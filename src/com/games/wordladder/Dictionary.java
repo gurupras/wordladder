@@ -9,7 +9,7 @@ import java.util.Vector;
 
 public class Dictionary extends HashMap<String, String> {
 	private static final int MAX_WORD_LENGTH = 12;
-	private static final int MIN_WORD_LENGTH = 4;
+	private static final int MIN_WORD_LENGTH = 3;
 	
 	private Map<Integer, List<String>> wordLengthMap;
 	private List<String> keys;
