@@ -38,12 +38,12 @@ public class WordLadderTest {
 		StringBuffer logSB		= new StringBuffer();
 		try {
 			for(Difficulty d : Difficulty.values()) {
-				logSB.append("Difficulty :" + d + "\n");
+				logSB.append("\tDifficulty :" + d + "\n");
 				timeKeeper.start();
 				WordLadder wl = new WordLadder(d);
-				logSB.append("\t" + wl.getPath() + "\n");
+				logSB.append("\t\t" + wl.getPath() + "\n");
 				timeKeeper.stop();
-				logSB.append("\tTime Taken :" + timeKeeper.toString() + "\n");
+				logSB.append("\t\tTime Taken :" + timeKeeper.toString() + "\n");
 			}
 		} catch(Exception e) {
 			failed = true;
@@ -65,6 +65,43 @@ public class WordLadderTest {
 		String origin = "hand";
 		String destination = "sane";
 		WordLadder wl = new WordLadder(origin, destination);
-		System.out.println(wl.getPath());
+//		System.out.println(wl.getPath());
+	}
+	
+	@Test
+	public void timingTest() {
+		final int ITERATIONS = 10;
+		StringBuffer localBuffer = new StringBuffer("Average time taken to initiaze each difficulty          :");
+		StringBuffer errorBuffer = new StringBuffer();
+		boolean failed = false;
+		
+		TimeKeeper timeKeeper	= new TimeKeeper();
+		StringBuffer logSB		= new StringBuffer();
+		try {
+			for(Difficulty d : Difficulty.values()) {
+				logSB.append("\tDifficulty :" + d + "\n");
+				double sum = 0;
+				for(int i = 0; i < ITERATIONS; i++) {
+					timeKeeper.start();
+					new WordLadder(d);
+					timeKeeper.stop();
+					sum += timeKeeper.getTimeTaken();
+				}
+				TimeKeeper averageTime = new TimeKeeper((long) (sum / ITERATIONS));
+				logSB.append("\t\tTime Taken :" + averageTime.toString() + "\n");
+			}
+		} catch(Exception e) {
+			failed = true;
+			errorBuffer.append(e.getMessage());
+			e.printStackTrace();
+		}
+		if(failed)
+			localBuffer.append("Failed\n");
+		else {
+			localBuffer.append("Passed\n");
+			localBuffer.append(logSB.toString());
+		}
+		localBuffer.append("\t" + errorBuffer + "\n");
+		result.append(localBuffer.toString());
 	}
 }
