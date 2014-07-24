@@ -4,8 +4,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
@@ -17,6 +19,7 @@ public class WordLadder {
 	private Dictionary dictionary;
 
 	public WordLadder(Difficulty difficulty) {
+		this.difficulty		= difficulty;
 		int steps 			= difficulty.getMaxSteps();
 		int maxWordLength	= difficulty.getMaxWordLength();
 		dictionary 			= DictionaryParser.getDictionary();
@@ -33,20 +36,41 @@ public class WordLadder {
 			destinationList.clear();
 			pathMap.clear();
 			this.origin			= dictionary.generateWord(maxWordLength);
-			getDestinations(origin, difficulty.getMaxSteps(), destinationList, pathMap);
+			getDestinations(origin, difficulty, destinationList, pathMap);
 		}
 		
 		int randomIndex		= (int) (0 + Math.random() * destinationList.size());
 		this.destination	= (String) destinationList.toArray()[randomIndex];
 		
 	}
-
-	private void getDestinations(String origin, int maxSteps, Collection<String> destinationList, Map<String,Collection<String>> pathMap) {
+	
+	public WordLadder(String origin, String destination) {
+		this.origin = origin;
+		this.destination = destination;
+		dictionary 			= DictionaryParser.getDictionary();
+	}
+	
+	public String getPath() {
+		StringBuffer sb = new StringBuffer();
+		List<String> path = findPath(origin, destination);
+		
+		Iterator<String> iter = path.iterator();
+		while(iter.hasNext()) {
+			String s = iter.next();
+			sb.append(s);
+			if(iter.hasNext())
+				sb.append("-->");
+		}
+		return sb.toString();
+	}
+	
+	private List<String> findPath(String origin, String destination) {
+		List<String> thePath = new LinkedList<String>();
 		Set<String> visited = new HashSet<String>();
 		visited.add(origin);
 		Queue<String> q = new LinkedList<String>();
 		q.add(origin);
-		int stepsTaken = 0;
+		Map<String, String> pathMap = new HashMap<String,String>();
 		while(!q.isEmpty()) {
 			String word = q.poll();
 			char[] wArray = word.toCharArray();
@@ -62,12 +86,57 @@ public class WordLadder {
 						}
 					}
 				}
+			} //end generation of adj words
+			for(String str : adjWords) {
+				if(str.equals(destination)) {
+					thePath.add(str);
+					while(word != null) {
+						thePath.add(word);
+						word = pathMap.get(word);
+					}
+					return thePath;
+				}
+				else {
+					visited.add(str);
+					q.offer(str);
+					pathMap.put(str, word);
+				}
+			}
+			
+		} //end of while q not empty loop
+		return thePath;
+	}
+
+	private void getDestinations(String origin, Difficulty difficulty, Collection<String> destinationList, Map<String,Collection<String>> pathMap) {
+		Set<String> visited = new HashSet<String>();
+		visited.add(origin);
+		Queue<String> q = new LinkedList<String>();
+		q.add(origin);
+		int stepsTaken = 0;
+		while(!q.isEmpty()) {
+			String word = q.poll();
+			char[] wArray = word.toCharArray();
+			LinkedList<String> adjWords = new LinkedList<String>();
+			for(int i = 0; i < wArray.length; i++) {
+				char[] wCopy = Arrays.copyOf(wArray, wArray.length);
+				for(char ch = 'a'; ch <= 'z'; ch++) {
+					if(wArray[i] != ch) {
+						wCopy[i] = ch;
+						String perm = String.copyValueOf(wCopy);
+						if(dictionary.containsKey(perm) && !visited.contains(perm)) {
+							adjWords.add(perm);
+						}
+					}
+				}
 			}
 			stepsTaken++;
 			for(String s : adjWords) {
-				if(dictionary.containsKey(s) && !visited.contains(s)) {
-					if(stepsTaken == maxSteps) {
-						destinationList.add(s);
+				if(!visited.contains(s)) {
+					if(stepsTaken >= difficulty.getMinSteps()) {
+						int optimalSteps = findPath(this.origin, s).size();
+						if(optimalSteps >= difficulty.getMinSteps()) {
+							destinationList.add(s);
+						}
 					}
 					visited.add(s);
 					q.add(s);
@@ -78,8 +147,6 @@ public class WordLadder {
 					list.add(s);
 					pathMap.put(word, list);
 				}
-				visited.add(s);
-				q.add(s);
 				Collection<String> list = new LinkedList<String>();
 				list.addAll(pathMap.get(word));
 				list.add(word);
@@ -88,7 +155,7 @@ public class WordLadder {
 			if(stepsTaken == difficulty.getMaxSteps()) {
 				break;
 			}
-			if(stepsTaken == maxSteps) {
+			if(stepsTaken == difficulty.getMaxSteps()) {
 				break;
 			}
 		}
