@@ -1,5 +1,12 @@
 package com.games.wordladder;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,5 +56,41 @@ public class Dictionary extends HashMap<String, String> {
 			wordLengthMap.put(key.length(), new Vector<String>());
 		wordLengthMap.get(key.length()).add(key);
 		return super.put(key, value);
+	}
+	
+	public void serialize(String path) {
+		File file = new File(path);
+		if(file.exists())
+			file.delete();
+		ObjectOutputStream out = null;
+		try {
+			out = new ObjectOutputStream(new FileOutputStream(file));
+			out.writeObject(this);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {out.close();} catch(Exception e) {}
+		}
+	}
+	
+	public static Dictionary deserialize(String path) throws FileNotFoundException {
+		Dictionary dictionary = null;
+		File file = new File(path);
+		if(!file.exists())
+			throw new FileNotFoundException("Dictionary file does not exist at :" + path);
+		ObjectInputStream in = null;
+		try {
+			in = new ObjectInputStream(new FileInputStream(file));
+			dictionary = (Dictionary) in.readObject();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} finally {
+			try {in.close();} catch(Exception e) {}
+		}
+		return dictionary;
 	}
 }

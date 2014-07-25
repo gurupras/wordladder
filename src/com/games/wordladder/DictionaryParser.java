@@ -18,7 +18,8 @@ import java.util.regex.Pattern;
  */
 public class DictionaryParser {
 	/** Path to the directory containing the dictionary files */
-	private static final String dictPath		= "libs/dictionary/";
+	private static final String dictPath			= "libs/dictionary.bin";
+	private static final String dictFilesPath		= "libs/dictionary/";
 	
 	/** Pattern of each entry in the dictionary files */
 	private static Pattern dictionaryPattern	= Pattern.compile("(\\w+)\\s+\\(.*\\)\\s(.*)");
@@ -30,17 +31,25 @@ public class DictionaryParser {
 	 * Private method to initialize the {@link #dictionary} field.
 	 * @return <b>true</b> if successfully initialized <br>
 	 * <b>false</b> otherwise
-	 * @throws DictionaryNotFound if {@link #dictPath} does not exist
+	 * @throws DictionaryNotFound if {@link #dictFilesPath} does not exist
 	 * @throws DictionaryPatternException if the {@link #dictionaryPattern} did not match all lines in the dictionary files
 	 */
 	public static void init() throws DictionaryNotFound, DictionaryPatternException {
-		Dictionary dictionary = new Dictionary();
+		Dictionary dictionary = null;
+		try {
+			dictionary = Dictionary.deserialize(dictPath);
+			DictionaryParser.dictionary = dictionary;
+			return;
+		} catch(Exception e) {
+		}
+
+		dictionary = new Dictionary();
 		StringBuffer errorBuffer = new StringBuffer();
-		File file = new File(dictPath);
+		File file = new File(dictFilesPath);
 		
 //		Dictionary directory is invalid. Throw the exception
 		if(!file.exists())
-			throw new DictionaryNotFound("Dictionary path " + dictPath + " does not exit");
+			throw new DictionaryNotFound("Dictionary path " + dictFilesPath + " does not exit");
 		
 		BufferedReader in = null;
 		try {
@@ -77,7 +86,7 @@ public class DictionaryParser {
 		
 //		At this point, we can't fail. So set DictionaryParser.dictionary to the dictionary we just built.
 		DictionaryParser.dictionary = dictionary;
-		
+		dictionary.serialize("libs/dictionary.bin");
 		if(errorBuffer.length() > 0) {
 //			We had some errors while parsing..throw the pattern exception
 			throw new DictionaryPatternException(errorBuffer.toString());
