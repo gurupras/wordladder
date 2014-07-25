@@ -28,30 +28,6 @@ public class MainActivity extends ActionBarActivity {
 	private BackgroundMusic mBGM = new BackgroundMusic();
  
 	@Override
-	protected void onDestroy() {
-		mBGM.pause();
-		super.onDestroy();
-	}
-	
-	@Override
-	protected void onPause() {
-		mBGM.pause();
-		super.onPause();
-	}
-	
-	@Override
-	protected void onStop() {
-		mBGM.pause();
-		super.onStop();
-	}
-	
-	@Override
-	protected void onResume() {
-		super.onResume();
-		mBGM.resume();
-	}
-	
-	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
@@ -161,29 +137,7 @@ public class MainActivity extends ActionBarActivity {
 	Thread resourceLoaderThread = new Thread(resourceLoader);
 	Thread progressThread = new Thread(progressRunnable);
 	
-	@Override
 	
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
-		int id = item.getItemId();
-		if (id == R.id.action_settings) {
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
-	}
-	
-	
-	
-
 	public synchronized void loadingInfoHandle(Message message) {
 		Bundle bundle = message.getData();
 		final String operation = bundle.get("operation").toString();
@@ -232,6 +186,49 @@ public class MainActivity extends ActionBarActivity {
 		runOnUiThread(updatePuzzle);
 	}
 	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.main, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle action bar item clicks here. The action bar will
+		// automatically handle clicks on the Home/Up button, so long
+		// as you specify a parent activity in AndroidManifest.xml.
+		int id = item.getItemId();
+		if (id == R.id.action_settings) {
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+	
+	@Override
+	protected void onDestroy() {
+		mBGM.pause();
+		super.onDestroy();
+	}
+	
+	@Override
+	protected void onPause() {
+		mBGM.pause();
+		super.onPause();
+	}
+	
+	@Override
+	protected void onStop() {
+		mBGM.pause();
+		super.onStop();
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		mBGM.resume();
+	}
+	
 
 	private class BackgroundMusic extends AsyncTask<Void, Void, Void> {
 		private MediaPlayer player;
@@ -261,6 +258,7 @@ public class MainActivity extends ActionBarActivity {
 			player.start();
 		}
 	}
+	
 	
 	public static class MessageHelper {
 		public static Message getStartMessage(String text) {
