@@ -37,51 +37,45 @@ public class MainActivity extends ActionBarActivity {
 		loadingInfoTextView = (TextView) findViewById(R.id.loadingInfo_textView);
 		puzzleTextView = (TextView) findViewById(R.id.puzzle_textView);
 		generatorInfoTextView = (TextView) findViewById(R.id.generatorInfo_textView);
-		loadingInfoProgressBar.setVisibility(View.VISIBLE);
-		loadingInfoTextView.setVisibility(View.VISIBLE);
-		loadingInfoTextView.setText("Loading Dictionary");
+		
 		
 		resourceLoaderThread.start();
 		
-		Thread gameThread = new Thread(new Runnable() {
-			public void run() {
-				try {
-					resourceLoaderThread.join();
-					progressThread.interrupt();
-					progressThread.join();
-					
-//					Now start UI for word ladder generation
-					Message message = MessageHelper.getStartMessage("Generating word ladder");
-					loadingInfoHandle(message);
-					progressThread = new Thread(progressRunnable);
-					Log.v(TAG, "Starting game progress thread");
-					Thread.sleep(100);
-					progressThread.start();
-					final WordLadder wl = new WordLadder(Difficulty.HARD, MainActivity.this);
-					progressThread.interrupt();
-					message = MessageHelper.getStopMessage();
-					loadingInfoHandle(message);
-					
-					handler.post(new Runnable() {
-						public void run() {
-							puzzleTextView.setText(wl.getPath());
-						}
-					});
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-		});
+		
 		gameThread.start();
 	}
 
+	Thread gameThread = new Thread(new Runnable() {
+		public void run() {
+			try {
+				resourceLoaderThread.join();
+				
+//				Now start UI for word ladder generation
+				Message message = MessageHelper.getStartMessage("Generating word ladder");
+				loadingInfoHandle(message);
+				Log.v(TAG, "Starting game progress thread");
+				Thread.sleep(100);
+				final WordLadder wl = new WordLadder(Difficulty.HARD, MainActivity.this);
+				message = MessageHelper.getStopMessage();
+				loadingInfoHandle(message);
+				
+				handler.post(new Runnable() {
+					public void run() {
+						puzzleTextView.setText(wl.getPath());
+					}
+				});
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	});
 	
-	Runnable resourceLoader = new Runnable() {
+	
+	Thread resourceLoaderThread = new Thread(new Runnable() {
 		public void run() {
 			Log.d(TAG, "Started loading dictionary");
 			Message message = MessageHelper.getStartMessage("Loading Dictionary");
 			loadingInfoHandle(message);
-			progressThread.start();
 			try {
 				DictionaryParser.init(MainActivity.this);
 			} catch(Exception e) {
@@ -97,46 +91,7 @@ public class MainActivity extends ActionBarActivity {
 			}
 			Log.d(TAG, "Finished loading dictionary");
 		}
-	};
-	
-	Runnable progressRunnable = new Runnable() {
-		public void run() {
-//			int idx = 0;
-//			final String originalString = loadingInfoTextView.getText().toString();
-//			Bundle bundle = new Bundle();
-//			bundle.putString("operation", "update");
-//			Message message = new Message();
-//			message.setData(bundle);
-//			while(true) {
-//				if(idx % 4 == 0) {
-//					bundle.putString("text", originalString);
-//					idx = 0;
-//				}
-//				else {
-//						String str = loadingInfoTextView.getText().toString();
-//						char[] array = str.toCharArray();
-//						array[array.length - 4 + idx] = '.';
-//						str = String.valueOf(array);
-//						bundle.putString("text", str);
-//				}
-//				infoHandler.dispatchMessage(message);
-//				try {
-//					Log.v(TAG, "progressThread running with text :" + originalString);
-//					Thread.sleep(10);
-//				} catch (InterruptedException e) {
-//					bundle.putString("operation", "stop");
-//					infoHandler.dispatchMessage(message);
-//					Log.v(TAG, "progressRunnable terminating due to interrupt");
-//					break;
-//				}
-//				idx++;
-//			}
-		}
-	};
-	
-	Thread resourceLoaderThread = new Thread(resourceLoader);
-	Thread progressThread = new Thread(progressRunnable);
-	
+	});
 	
 	public synchronized void loadingInfoHandle(Message message) {
 		Bundle bundle = message.getData();
@@ -226,7 +181,7 @@ public class MainActivity extends ActionBarActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		mBGM.resume();
+//		mBGM.resume();
 	}
 	
 
