@@ -1,0 +1,4 @@
+Convert Activity to Fragment to retain state
+    Activity is destroyed and re-created upon orientation change.
+    Thus, we need to switch to Fragments to retain this state.
+
