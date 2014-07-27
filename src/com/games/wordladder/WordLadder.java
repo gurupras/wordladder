@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
+import com.android_app.GameActivity;
 import com.android_app.MainActivity;
 
 import android.R;
@@ -29,7 +30,7 @@ public class WordLadder {
 	private String destination;
 	private Dictionary dictionary;
 	
-	public WordLadder(Difficulty difficulty, MainActivity activity) {
+	public WordLadder(Difficulty difficulty, GameActivity activity) {
 		TimeKeeper tk = new TimeKeeper();
 		tk.start();
 		

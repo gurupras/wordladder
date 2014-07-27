@@ -7,6 +7,8 @@ import com.games.wordladder.WordLadder;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -18,6 +20,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.os.Build;
@@ -25,11 +28,17 @@ import android.os.Build;
 public class MainActivity extends ActionBarActivity {
 	public static final String TAG = "WordLadder";
 	private TextView loadingInfoTextView;
-	private TextView puzzleTextView;
-	private TextView generatorInfoTextView;
 	private ProgressBar loadingInfoProgressBar;
+
+	private Button startGameButton;
+	private Button settingsButton;
+	private Button highScoresButton;
+	
+	private TextView puzzleTextView;
+	
+	
 	private Handler handler;
-	private BackgroundMusic mBGM = new BackgroundMusic();
+	private BackgroundMusic mBGM;
 	
 	private Boolean loadComplete = false;
 	
@@ -37,9 +46,19 @@ public class MainActivity extends ActionBarActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		
+		handler = new Handler();
+		mBGM = BackgroundMusic.getInstance(this);
+		
 		if (savedInstanceState == null) {
-			getSupportFragmentManager().beginTransaction()
-					.add(R.id.container, new PlaceholderFragment()).commit();
+			if(!loadComplete) {
+				getSupportFragmentManager().beginTransaction()
+				 .add(R.id.container, new MainFragment()).commit();
+			}
+			else {
+				getSupportFragmentManager().beginTransaction()
+				 .add(R.id.container, new MainFragment()).commit();
+			}
 		}
 	}
 
@@ -62,12 +81,9 @@ public class MainActivity extends ActionBarActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
-	/**
-	 * A placeholder fragment containing a simple view.
-	 */
-	public class PlaceholderFragment extends Fragment {
+	public class MainFragment extends Fragment {
 		
-		public PlaceholderFragment() {
+		public MainFragment() {
 			setRetainInstance(true);
 		}
 
@@ -76,18 +92,26 @@ public class MainActivity extends ActionBarActivity {
 				Bundle savedInstanceState) {
 			View rootView = inflater.inflate(R.layout.fragment_main, container,
 					false);
-			handler = new Handler();	
+
 			loadingInfoProgressBar = (ProgressBar) rootView.findViewById(R.id.loadingInfo_progressBar);
 			loadingInfoTextView = (TextView) rootView.findViewById(R.id.loadingInfo_textView);
-			puzzleTextView = (TextView) rootView.findViewById(R.id.puzzle_textView);
-			generatorInfoTextView = (TextView) rootView.findViewById(R.id.generatorInfo_textView);
-
+			
+			startGameButton = (Button) rootView.findViewById(R.id.startGame_button);
+			settingsButton = (Button) rootView.findViewById(R.id.settings_button);
+			highScoresButton = (Button) rootView.findViewById(R.id.highScores_button);
+			
 			synchronized(loadComplete) {
 				if(!loadComplete) {
+					startGameButton.setVisibility(View.INVISIBLE);
+					startGameButton.setEnabled(false);
+					settingsButton.setVisibility(View.INVISIBLE);
+					settingsButton.setEnabled(false);
+					highScoresButton.setVisibility(View.INVISIBLE);
+					highScoresButton.setEnabled(false);
+
 					loadingInfoProgressBar.setVisibility(View.VISIBLE);
 					try {
 						resourceLoaderThread.start();
-						gameThread.start();
 					} catch(Exception e) {
 						Log.w(TAG, "Fragment thread exception :" + e.getMessage());
 						Log.d(TAG, "Fragment onCreate loadComplete? :" + loadComplete);
@@ -99,38 +123,6 @@ public class MainActivity extends ActionBarActivity {
 			return rootView;
 		}
 	}
-	
-
-	Thread gameThread = new Thread(new Runnable() {
-		public void run() {
-			try {
-				resourceLoaderThread.join();
-				
-	//			Now start UI for word ladder generation
-				Message message = MessageHelper.getStartMessage("Generating word ladder");
-				loadingInfoHandle(message);
-				Log.v(TAG, "Starting game progress thread");
-				Thread.sleep(100);
-				final WordLadder wl = new WordLadder(Difficulty.HARD, MainActivity.this);
-				message = MessageHelper.getStopMessage();
-				loadingInfoHandle(message);
-				
-				handler.post(new Runnable() {
-					public void run() {
-						puzzleTextView.setText(wl.getPath());
-					}
-				});
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			synchronized(loadComplete) {
-				loadComplete = true;
-				Log.d(TAG, "loadComplete? :" + loadComplete);
-			}
-			
-		}
-	});
-	
 	
 	Thread resourceLoaderThread = new Thread(new Runnable() {
 		public void run() {
@@ -151,6 +143,22 @@ public class MainActivity extends ActionBarActivity {
 				e.printStackTrace();
 			}
 			Log.d(TAG, "Finished loading dictionary");
+			
+			synchronized(loadComplete) {
+				loadComplete = true;
+				handler.post(new Runnable() {
+					public void run() {
+						startGameButton.setVisibility(View.VISIBLE);
+						startGameButton.setEnabled(true);
+						settingsButton.setVisibility(View.VISIBLE);
+						settingsButton.setEnabled(true);
+						highScoresButton.setVisibility(View.VISIBLE);
+						highScoresButton.setEnabled(true);
+
+					}
+				});
+				Log.d(TAG, "loadComplete? :" + loadComplete);
+			}
 		}
 	});
 	
@@ -190,18 +198,6 @@ public class MainActivity extends ActionBarActivity {
 		}
 	}
 	
-	public synchronized void generatorInfoHandle(Message message) {
-		
-		Bundle bundle = message.getData();
-		final String text = bundle.getString("text");
-		Runnable updatePuzzle = new Runnable() {
-			public void run() {
-				generatorInfoTextView.setText(text);		
-			}
-		};
-		runOnUiThread(updatePuzzle);
-	}
-	
 	@Override
 	protected void onDestroy() {
 		mBGM.pause();
@@ -223,39 +219,29 @@ public class MainActivity extends ActionBarActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-	//	mBGM.resume();
+		
+		SharedPreferences preferences = getSharedPreferences(SettingsActivity.PREFERENCE_FILE, 0);
+		boolean userWantsMusic = preferences.getBoolean("music", true);
+		if(userWantsMusic)
+			mBGM.play();
 	}
 	
 	
-	private class BackgroundMusic extends AsyncTask<Void, Void, Void> {
-		private MediaPlayer player;
-		@Override
-		protected synchronized Void doInBackground(Void... params) {
-			if(player == null)
-				player = MediaPlayer.create(MainActivity.this, R.raw.bgm_1);
-			if(!player.isPlaying()) {
-				player.setLooping(true);
-				player.setVolume(15, 15);
-				player.start();
-			}
-			return null;
-		}
-		public synchronized void pause() {
-			if(player == null || !player.isPlaying())
-				return;
-			player.pause();
-		}
-		public synchronized void resume() {
-			if(player == null) {
-				execute(new Void[] {null});
-				return;
-			}
-			if(player.isPlaying())
-				return;
-			player.start();
-		}
+	public void startGameButton_onClick(View view) {
+		Intent myIntent = new Intent(this, GameActivity.class);
+//		myIntent.putExtra("key", value); //Optional parameters
+		startActivity(myIntent);
 	}
 	
+	public void settingsButton_onClick(View view) {
+		Intent myIntent = new Intent(this, SettingsActivity.class);
+//		myIntent.putExtra("key", value); //Optional parameters
+		startActivity(myIntent);
+	}
+	
+	public void highScoresButton_onClick(View view) {
+		
+	}
 	
 	public static class MessageHelper {
 		public static Message getStartMessage(String text) {
