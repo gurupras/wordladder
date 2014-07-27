@@ -1,55 +1,7 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.android_app.MainActivity" >
-
-    <TextView
-        android:id="@+id/puzzle_textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="26dp"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
-    <ProgressBar
-        android:id="@+id/loadingInfo_progressBar"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/puzzle_textView"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="18dp"
-        android:indeterminate="true"
-        android:visibility="visible" />
-
-    <TextView
-        android:id="@+id/generatorInfo_textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignRight="@+id/loadingInfo_textView"
-        android:layout_below="@+id/loadingInfo_progressBar"
-        android:layout_marginTop="32dp"
-        android:gravity="center"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
-    <TextView
-        android:id="@+id/loadingInfo_textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/puzzle_textView"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/generatorInfo_textView"
-        android:layout_marginTop="48dp"
-        android:gravity="center"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:visibility="visible" />
-
-</RelativeLayout>
+    tools:context="com.android_app.MainActivity"
+    tools:ignore="MergeRootFrame" />

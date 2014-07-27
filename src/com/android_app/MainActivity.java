@@ -1,22 +1,26 @@
 package com.android_app;
 
-import com.android_app.R;
 import com.games.wordladder.DictionaryParser;
 import com.games.wordladder.Difficulty;
 import com.games.wordladder.WordLadder;
 
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.ActionBar;
+import android.support.v4.app.Fragment;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.os.Build;
 
 public class MainActivity extends ActionBarActivity {
 	public static final String TAG = "WordLadder";
@@ -26,31 +30,72 @@ public class MainActivity extends ActionBarActivity {
 	private ProgressBar loadingInfoProgressBar;
 	private Handler handler;
 	private BackgroundMusic mBGM = new BackgroundMusic();
- 
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		handler = new Handler();
-		
-		loadingInfoProgressBar = (ProgressBar) findViewById(R.id.loadingInfo_progressBar);
-		loadingInfoTextView = (TextView) findViewById(R.id.loadingInfo_textView);
-		puzzleTextView = (TextView) findViewById(R.id.puzzle_textView);
-		generatorInfoTextView = (TextView) findViewById(R.id.generatorInfo_textView);
-		
-		
-		resourceLoaderThread.start();
-		
-		
-		gameThread.start();
+		if (savedInstanceState == null) {
+			getSupportFragmentManager().beginTransaction()
+					.add(R.id.container, new PlaceholderFragment()).commit();
+		}
 	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.main, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle action bar item clicks here. The action bar will
+		// automatically handle clicks on the Home/Up button, so long
+		// as you specify a parent activity in AndroidManifest.xml.
+		int id = item.getItemId();
+		if (id == R.id.action_settings) {
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
+	/**
+	 * A placeholder fragment containing a simple view.
+	 */
+	public class PlaceholderFragment extends Fragment {
+
+		public PlaceholderFragment() {
+		}
+
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container,
+				Bundle savedInstanceState) {
+			View rootView = inflater.inflate(R.layout.fragment_main, container,
+					false);
+			handler = new Handler();	
+			loadingInfoProgressBar = (ProgressBar) rootView.findViewById(R.id.loadingInfo_progressBar);
+			loadingInfoTextView = (TextView) rootView.findViewById(R.id.loadingInfo_textView);
+			puzzleTextView = (TextView) rootView.findViewById(R.id.puzzle_textView);
+			generatorInfoTextView = (TextView) rootView.findViewById(R.id.generatorInfo_textView);
+			
+			
+			resourceLoaderThread.start();
+			
+			
+			gameThread.start();
+
+			return rootView;
+		}
+	}
+	
 
 	Thread gameThread = new Thread(new Runnable() {
 		public void run() {
 			try {
 				resourceLoaderThread.join();
 				
-//				Now start UI for word ladder generation
+	//			Now start UI for word ladder generation
 				Message message = MessageHelper.getStartMessage("Generating word ladder");
 				loadingInfoHandle(message);
 				Log.v(TAG, "Starting game progress thread");
@@ -111,7 +156,7 @@ public class MainActivity extends ActionBarActivity {
 		else if(operation.equals("update")) {
 			Runnable update = new Runnable() {
 				public void run() {
-//					Log.v(TAG, "loadingInfoTextView text :" + text);
+	//				Log.v(TAG, "loadingInfoTextView text :" + text);
 					loadingInfoTextView.setText(text);
 				}
 			};
@@ -128,7 +173,7 @@ public class MainActivity extends ActionBarActivity {
 			runOnUiThread(stop);
 		}
 	}
-
+	
 	public synchronized void generatorInfoHandle(Message message) {
 		
 		Bundle bundle = message.getData();
@@ -139,25 +184,6 @@ public class MainActivity extends ActionBarActivity {
 			}
 		};
 		runOnUiThread(updatePuzzle);
-	}
-	
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
-		int id = item.getItemId();
-		if (id == R.id.action_settings) {
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
 	}
 	
 	@Override
@@ -181,10 +207,10 @@ public class MainActivity extends ActionBarActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-//		mBGM.resume();
+	//	mBGM.resume();
 	}
 	
-
+	
 	private class BackgroundMusic extends AsyncTask<Void, Void, Void> {
 		private MediaPlayer player;
 		@Override
