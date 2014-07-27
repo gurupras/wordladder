@@ -31,6 +31,8 @@ public class MainActivity extends ActionBarActivity {
 	private Handler handler;
 	private BackgroundMusic mBGM = new BackgroundMusic();
 	
+	private Boolean loadComplete = false;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -64,8 +66,9 @@ public class MainActivity extends ActionBarActivity {
 	 * A placeholder fragment containing a simple view.
 	 */
 	public class PlaceholderFragment extends Fragment {
-
+		
 		public PlaceholderFragment() {
+			setRetainInstance(true);
 		}
 
 		@Override
@@ -78,13 +81,21 @@ public class MainActivity extends ActionBarActivity {
 			loadingInfoTextView = (TextView) rootView.findViewById(R.id.loadingInfo_textView);
 			puzzleTextView = (TextView) rootView.findViewById(R.id.puzzle_textView);
 			generatorInfoTextView = (TextView) rootView.findViewById(R.id.generatorInfo_textView);
-			
-			
-			resourceLoaderThread.start();
-			
-			
-			gameThread.start();
 
+			synchronized(loadComplete) {
+				if(!loadComplete) {
+					loadingInfoProgressBar.setVisibility(View.VISIBLE);
+					try {
+						resourceLoaderThread.start();
+						gameThread.start();
+					} catch(Exception e) {
+						Log.w(TAG, "Fragment thread exception :" + e.getMessage());
+						Log.d(TAG, "Fragment onCreate loadComplete? :" + loadComplete);
+					}
+				}
+				else
+					loadingInfoProgressBar.setVisibility(View.INVISIBLE);
+			}
 			return rootView;
 		}
 	}
@@ -112,6 +123,11 @@ public class MainActivity extends ActionBarActivity {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+			synchronized(loadComplete) {
+				loadComplete = true;
+				Log.d(TAG, "loadComplete? :" + loadComplete);
+			}
+			
 		}
 	});
 	

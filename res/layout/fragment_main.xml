@@ -16,6 +16,7 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:layout_marginTop="26dp"
+        android:freezesText="true"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <ProgressBar
@@ -27,6 +28,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="18dp"
         android:indeterminate="true"
+        android:saveEnabled="true"
         android:visibility="visible" />
 
     <TextView
@@ -38,6 +40,7 @@
         android:layout_below="@+id/loadingInfo_progressBar"
         android:layout_marginTop="32dp"
         android:gravity="center"
+        android:freezesText="true"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView
@@ -49,6 +52,7 @@
         android:layout_below="@+id/generatorInfo_textView"
         android:layout_marginTop="48dp"
         android:gravity="center"
+        android:freezesText="true"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:visibility="visible" />
     
