@@ -18,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.os.Build;
@@ -25,9 +26,16 @@ import android.os.Build;
 public class MainActivity extends ActionBarActivity {
 	public static final String TAG = "WordLadder";
 	private TextView loadingInfoTextView;
-	private TextView puzzleTextView;
 	private TextView generatorInfoTextView;
 	private ProgressBar loadingInfoProgressBar;
+
+	private Button startGameButton;
+	private Button settingsButton;
+	private Button highScoresButton;
+	
+	private TextView puzzleTextView;
+	
+	
 	private Handler handler;
 	private BackgroundMusic mBGM = new BackgroundMusic();
 	
@@ -37,9 +45,17 @@ public class MainActivity extends ActionBarActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		handler = new Handler();
+		
 		if (savedInstanceState == null) {
-			getSupportFragmentManager().beginTransaction()
-					.add(R.id.container, new PlaceholderFragment()).commit();
+			if(!loadComplete) {
+				getSupportFragmentManager().beginTransaction()
+				 .add(R.id.container, new MainFragment()).commit();
+			}
+			else {
+				getSupportFragmentManager().beginTransaction()
+				 .add(R.id.container, new MainFragment()).commit();
+			}
 		}
 	}
 
@@ -62,12 +78,9 @@ public class MainActivity extends ActionBarActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
-	/**
-	 * A placeholder fragment containing a simple view.
-	 */
-	public class PlaceholderFragment extends Fragment {
+	public class MainFragment extends Fragment {
 		
-		public PlaceholderFragment() {
+		public MainFragment() {
 			setRetainInstance(true);
 		}
 
@@ -76,18 +89,27 @@ public class MainActivity extends ActionBarActivity {
 				Bundle savedInstanceState) {
 			View rootView = inflater.inflate(R.layout.fragment_main, container,
 					false);
-			handler = new Handler();	
+
 			loadingInfoProgressBar = (ProgressBar) rootView.findViewById(R.id.loadingInfo_progressBar);
 			loadingInfoTextView = (TextView) rootView.findViewById(R.id.loadingInfo_textView);
-			puzzleTextView = (TextView) rootView.findViewById(R.id.puzzle_textView);
 			generatorInfoTextView = (TextView) rootView.findViewById(R.id.generatorInfo_textView);
-
+			
+			startGameButton = (Button) rootView.findViewById(R.id.startGame_button);
+			settingsButton = (Button) rootView.findViewById(R.id.settings_button);
+			highScoresButton = (Button) rootView.findViewById(R.id.highScores_button);
+			
 			synchronized(loadComplete) {
 				if(!loadComplete) {
+					startGameButton.setVisibility(View.INVISIBLE);
+					startGameButton.setEnabled(false);
+					settingsButton.setVisibility(View.INVISIBLE);
+					settingsButton.setEnabled(false);
+					highScoresButton.setVisibility(View.INVISIBLE);
+					highScoresButton.setEnabled(false);
+
 					loadingInfoProgressBar.setVisibility(View.VISIBLE);
 					try {
 						resourceLoaderThread.start();
-						gameThread.start();
 					} catch(Exception e) {
 						Log.w(TAG, "Fragment thread exception :" + e.getMessage());
 						Log.d(TAG, "Fragment onCreate loadComplete? :" + loadComplete);
@@ -100,6 +122,23 @@ public class MainActivity extends ActionBarActivity {
 		}
 	}
 	
+	public class GameFragment extends Fragment {
+		
+		public GameFragment() {
+			setRetainInstance(true);
+		}
+
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container,
+				Bundle savedInstanceState) {
+			View rootView = inflater.inflate(R.layout.fragment_game, container,
+					false);
+
+			puzzleTextView = (TextView) rootView.findViewById(R.id.puzzle_textView);
+
+			return rootView;
+		}
+	}
 
 	Thread gameThread = new Thread(new Runnable() {
 		public void run() {
@@ -123,11 +162,6 @@ public class MainActivity extends ActionBarActivity {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			synchronized(loadComplete) {
-				loadComplete = true;
-				Log.d(TAG, "loadComplete? :" + loadComplete);
-			}
-			
 		}
 	});
 	
@@ -151,6 +185,22 @@ public class MainActivity extends ActionBarActivity {
 				e.printStackTrace();
 			}
 			Log.d(TAG, "Finished loading dictionary");
+			
+			synchronized(loadComplete) {
+				loadComplete = true;
+				handler.post(new Runnable() {
+					public void run() {
+						startGameButton.setVisibility(View.VISIBLE);
+						startGameButton.setEnabled(true);
+						settingsButton.setVisibility(View.VISIBLE);
+						settingsButton.setEnabled(true);
+						highScoresButton.setVisibility(View.VISIBLE);
+						highScoresButton.setEnabled(true);
+
+					}
+				});
+				Log.d(TAG, "loadComplete? :" + loadComplete);
+			}
 		}
 	});
 	
