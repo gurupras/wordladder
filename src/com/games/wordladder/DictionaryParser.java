@@ -29,7 +29,7 @@ import static com.android_app.MainActivity.TAG;
  */
 public class DictionaryParser {
 	/** Path to the directory containing the dictionary files */
-	private static final String dictPath			= Environment.getExternalStorageDirectory().getAbsolutePath() + "/wordladder/dictionary.bin";
+	public static final String dictPath			= Environment.getExternalStorageDirectory().getAbsolutePath() + "/wordladder/";
 	
 	/** Pattern of each entry in the dictionary files */
 	private static Pattern dictionaryPattern	= Pattern.compile("(\\w+)\\s+\\(.*\\)\\s(.*)");
@@ -46,18 +46,17 @@ public class DictionaryParser {
 	 * @throws DictionaryPatternException if the {@link #dictionaryPattern} did not match all lines in the dictionary files
 	 */
 	public static void init(Context context) throws DictionaryNotFound, DictionaryPatternException {
-		Dictionary dictionary = null;
+		Dictionary dictionary = new Dictionary();
 		TimeKeeper tk = new TimeKeeper();
 		tk.start();
 		try {
-			dictionary = Dictionary.deserialize(context, dictPath);
+			boolean succeeded = Dictionary.deserialize(context, dictPath,dictionary);
 			DictionaryParser.dictionary = dictionary;
 			tk.stop();
-			if(dictionary != null) {
+			if(succeeded) {
 				Log.v(TAG, "Time taken to deserialize dictionary :" + tk.toString());
 				return;
 			}
-			
 		} catch(Exception e) {
 			Log.v(TAG, "Could not deserialize dictionary..first run?");
 		}
@@ -104,12 +103,12 @@ public class DictionaryParser {
 		tk.start();
 //		At this point, we can't fail. So set DictionaryParser.dictionary to the dictionary we just built.
 		DictionaryParser.dictionary = dictionary;
-		File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/wordladder/");
+		File file = new File(dictPath);
 		if(!file.exists()) {
 			if(!file.mkdirs())
 				Log.e(TAG, "Could not create directories");
 		}
-		dictionary.serialize(file.getAbsolutePath() + "/dictionary.bin");
+		dictionary.serialize(dictPath);
 		tk.stop();
 		Log.v(TAG, "Time taken to serialize dictionary :" + tk.toString());
 		if(errorBuffer.length() > 0) {
