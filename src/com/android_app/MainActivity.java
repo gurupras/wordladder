@@ -51,14 +51,8 @@ public class MainActivity extends ActionBarActivity {
 		mBGM = BackgroundMusic.getInstance(this);
 		
 		if (savedInstanceState == null) {
-			if(!loadComplete) {
 				getSupportFragmentManager().beginTransaction()
 				 .add(R.id.container, new MainFragment()).commit();
-			}
-			else {
-				getSupportFragmentManager().beginTransaction()
-				 .add(R.id.container, new MainFragment()).commit();
-			}
 		}
 	}
 

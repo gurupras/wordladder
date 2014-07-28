@@ -39,7 +39,7 @@ public class WordLadder {
 		int maxWordLength	= difficulty.getMaxWordLength();
 		dictionary 			= DictionaryParser.getDictionary();
 		if(dictionary == null || dictionary.size() <= 0)
-			Log.e(TAG, "Trying to initialize WordLadder with incomplete dictionary");
+			Log.w(TAG, "Trying to initialize WordLadder with incomplete dictionary");
 
 //		Map<String, Collection<String>> validDestinations = new HashMap<String, Collection<String>>();
 //		while(validDestinations.size() < 1) {

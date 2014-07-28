@@ -30,6 +30,8 @@ public class GameActivity extends ActionBarActivity {
 	
 	private TextView puzzleTextView;
 	
+	private Boolean loadComplete = false;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -77,8 +79,22 @@ public class GameActivity extends ActionBarActivity {
 			loadingInfoTextView = (TextView) rootView.findViewById(R.id.loadingInfo_textView);
 			generatorInfoTextView = (TextView) rootView.findViewById(R.id.generatorInfo_textView);
 			
-			gameThread.start();
-			
+			synchronized(loadComplete) {
+				if(!loadComplete) {
+					Message message = MessageHelper.getStartMessage("Generating word ladder");
+					loadingInfoHandle(message);
+					try {
+						gameThread.start();
+					} catch(IllegalThreadStateException e) {
+						Log.w(TAG, "Game thread has already started");
+					}
+				}
+				else {
+					loadingInfoProgressBar.setVisibility(View.INVISIBLE);
+					loadingInfoTextView.setVisibility(View.INVISIBLE);
+					generatorInfoTextView.setVisibility(View.INVISIBLE);
+				}
+			}
 			return rootView;
 		}
 	}
@@ -87,12 +103,10 @@ public class GameActivity extends ActionBarActivity {
 		public void run() {
 			try {
 	//			Now start UI for word ladder generation
-				Message message = MessageHelper.getStartMessage("Generating word ladder");
-				loadingInfoHandle(message);
 				Log.v(TAG, "Starting game progress thread");
 				Thread.sleep(100);
 				final WordLadder wl = new WordLadder(Difficulty.HARD, GameActivity.this);
-				message = MessageHelper.getStopMessage();
+				Message message = MessageHelper.getStopMessage();
 				loadingInfoHandle(message);
 				
 				handler.post(new Runnable() {
@@ -102,6 +116,10 @@ public class GameActivity extends ActionBarActivity {
 				});
 			} catch (InterruptedException e) {
 				e.printStackTrace();
+			}
+			
+			synchronized(loadComplete) {
+				loadComplete = true;
 			}
 		}
 	});

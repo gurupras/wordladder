@@ -11,6 +11,7 @@ import java.io.StreamCorruptedException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -82,7 +83,7 @@ public class Dictionary extends HashMap<String, String> {
 			return null;
 		keys.add(key);
 		if(!wordLengthMap.containsKey(key.length()))
-			wordLengthMap.put(key.length(), new Vector<String>());
+			wordLengthMap.put(key.length(), new LinkedList<String>());
 		wordLengthMap.get(key.length()).add(key);
 		return super.put(key, value);
 	}
@@ -92,11 +93,10 @@ public class Dictionary extends HashMap<String, String> {
 		ObjectOutputStream out = null;
 		try {
 
-			File keysFile = new File(file.getAbsolutePath() + "/dict_keys.bin");
-			out = new ObjectOutputStream(new FileOutputStream(keysFile));
-			out.writeObject(keys);
+			File lengthMapFile = new File(file.getAbsolutePath() + "/dict_length_map.bin");
+			out = new ObjectOutputStream(new FileOutputStream(lengthMapFile));
 			out.writeObject(wordLengthMap);
-			Log.d(TAG, "Serialized keys to :" + keysFile.getAbsolutePath());
+			Log.d(TAG, "Serialized wordLengthMap to :" + lengthMapFile.getAbsolutePath());
 		} catch (Exception e) {
 			Log.e(TAG, "Could not serialize dictionary");
 			Log.e(TAG, e.getMessage());
@@ -121,16 +121,19 @@ public class Dictionary extends HashMap<String, String> {
 		ObjectInputStream in = null;
 		try {
 			AssetManager am = context.getAssets();
-			in = new ObjectInputStream(am.open("dict_keys.bin"));
-			returnDictionary.keys = (HashSet<String>) in.readObject();
+			in = new ObjectInputStream(am.open("dict_length_map.bin"));
 			returnDictionary.wordLengthMap = (HashMap<Integer, List<String>>) in.readObject();
+			HashSet<String> keys = new HashSet<String>();
+			for(int key : returnDictionary.wordLengthMap.keySet())
+				keys.addAll(returnDictionary.wordLengthMap.get(key));
+			returnDictionary.keys = keys;
 		} catch(Exception e) {
-			Log.e(TAG, "AssetManager could not find dict_keys.bin..falling back to sdcard :" + e.getMessage());
-			File file = new File(DictionaryParser.dictPath + "/dict_keys.bin");
+			Log.e(TAG, "AssetManager could not find dict_length_map.bin..falling back to sdcard :" + e.getMessage());
+			File file = new File(DictionaryParser.dictPath + "/dict_length_map.bin");
 			try {
 				in = new ObjectInputStream(new FileInputStream(file));
 			} catch (Exception e1) {
-				Log.e(TAG, "Could not find dictionary.bin in sdcard..null dictionary :" + e1.getMessage());
+				Log.e(TAG, "Could not find dictionary.bin in sdcard :" + e1.getMessage());
 			}
 		} finally {
 			try {in.close();} catch(Exception e) {}

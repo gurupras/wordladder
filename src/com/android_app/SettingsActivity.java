@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,10 +20,13 @@ import android.os.Build;
 
 public class SettingsActivity extends ActionBarActivity {
 	protected static final String PREFERENCE_FILE = "preferences";
+	public final String TAG = "WordLadder->Settings"; 
 	private SharedPreferences preferences;
 	
 	private CheckBox musicCheckBox;
 	private Handler handler;
+	
+	private Boolean userWantsMusic = false;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -69,9 +73,13 @@ public class SettingsActivity extends ActionBarActivity {
 			View rootView = inflater.inflate(R.layout.fragment_settings,
 					container, false);
 			
-			boolean userWantsMusic = preferences.getBoolean("music", false);
 			musicCheckBox = (CheckBox) rootView.findViewById(R.id.musicCheckBox);
-			musicCheckBox.setChecked(userWantsMusic);
+			synchronized(userWantsMusic) {
+				userWantsMusic = preferences.getBoolean("music", false);
+				musicCheckBox.setChecked(userWantsMusic);
+			}
+			
+			
 			musicCheckBox.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View view) {
@@ -84,9 +92,11 @@ public class SettingsActivity extends ActionBarActivity {
 		public synchronized void musicCheckBox_onClick(View view) {
 			BackgroundMusic bgm = BackgroundMusic.getInstance(SettingsActivity.this);
 			if(musicCheckBox.isChecked()) {
+				userWantsMusic = true;
 				bgm.play();
 			}
 			else {
+				userWantsMusic = false;
 				bgm.setActivityWide(false);
 				bgm.disable();
 			}
@@ -95,9 +105,13 @@ public class SettingsActivity extends ActionBarActivity {
 	
 	@Override
 	public void onStop() {
-		super.onStop();
 		SharedPreferences.Editor editor = preferences.edit();
-		editor.putBoolean("music", musicCheckBox.isChecked());
-		editor.commit();
+		if(editor == null)
+			Log.e(TAG, "Could not save preferences!");
+		else {
+			editor.putBoolean("music", userWantsMusic);
+			editor.commit();
+		}
+		super.onStop();
 	}
 }

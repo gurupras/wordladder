@@ -31,15 +31,19 @@ public class BackgroundMusic {
 	public synchronized void disable() {
 		if(player == null || !player.isPlaying())
 			return;
-		else
+		else {
 			player.stop();
+			player.reset();
+			player.release();
+			player = null;
+		}
 	}
 	
 	public synchronized void play() {
-		if(player.isPlaying())
-			return;
 		if(player == null)
 			init();
+		if(player.isPlaying())
+			return;
 		try {
 			player.start();
 		} catch (IllegalStateException e) {
