@@ -52,7 +52,8 @@ public class WordLadder {
 			destinationList.clear();
 			pathMap.clear();
 			this.origin			= dictionary.generateWord(maxWordLength);
-			activity.generatorInfoHandle(MainActivity.MessageHelper.getUpdateMessage("Trying :" + this.origin));
+			activity.generatorInfoHandle(
+					MainActivity.MessageHelper.getUpdateMessage("Trying :" + this.origin));
 			getDestinations(origin, difficulty, destinationList, pathMap);
 		}
 		

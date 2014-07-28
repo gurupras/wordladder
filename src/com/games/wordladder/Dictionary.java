@@ -24,7 +24,7 @@ import android.util.Log;
 import static com.android_app.MainActivity.TAG;
 
 public class Dictionary extends HashMap<String, String> {
-	private static final long serialVersionUID = 8294139649593205421L;
+	private static final long serialVersionUID = 678012212632622998L;
 	
 	public static final boolean ANDROID = true;
 	private static final int MAX_WORD_LENGTH = 12;
@@ -85,7 +85,10 @@ public class Dictionary extends HashMap<String, String> {
 		if(!wordLengthMap.containsKey(key.length()))
 			wordLengthMap.put(key.length(), new LinkedList<String>());
 		wordLengthMap.get(key.length()).add(key);
-		return super.put(key, value);
+		
+//		Swap commenting on following lines if you want Dictionary to store data in the HashMap
+//		return super.put(key, value);
+		return null;
 	}
 	
 	public void serialize(String path) {
@@ -189,7 +192,7 @@ public class Dictionary extends HashMap<String, String> {
 			if(dictionary.size() > 0)
 				Log.d(TAG, "Loaded full dictionary successfully : " + tk.toString());
 			else
-				Log.d(TAG, "Failed to load full dictionary" + tk.toString());
+				Log.d(TAG, "Failed to load full dictionary :" + tk.toString());
 		}
 	}
 }
