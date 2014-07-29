@@ -75,7 +75,7 @@ public class SettingsActivity extends ActionBarActivity {
 			
 			musicCheckBox = (CheckBox) rootView.findViewById(R.id.musicCheckBox);
 			synchronized(userWantsMusic) {
-				userWantsMusic = preferences.getBoolean("music", false);
+				userWantsMusic = preferences.getBoolean("music", true);
 				musicCheckBox.setChecked(userWantsMusic);
 			}
 			
