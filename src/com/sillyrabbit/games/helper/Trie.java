@@ -1,4 +1,4 @@
-package com.trie;
+package com.sillyrabbit.games.helper;
 
 import java.util.HashMap;
 import java.util.Map;

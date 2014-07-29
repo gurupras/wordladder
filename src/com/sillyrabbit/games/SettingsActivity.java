@@ -1,4 +1,6 @@
-package com.android_app;
+package com.sillyrabbit.games;
+
+import com.android_app.R;
 
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;

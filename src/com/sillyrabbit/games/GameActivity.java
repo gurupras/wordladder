@@ -1,8 +1,9 @@
-package com.android_app;
+package com.sillyrabbit.games;
 
-import com.android_app.MainActivity.MessageHelper;
-import com.games.wordladder.Difficulty;
-import com.games.wordladder.WordLadder;
+import com.android_app.R;
+import com.sillyrabbit.games.MainActivity.MessageHelper;
+import com.sillyrabbit.games.wordladder.Difficulty;
+import com.sillyrabbit.games.wordladder.WordLadder;
 
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
@@ -19,7 +20,7 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.os.Build;
-import static com.android_app.MainActivity.TAG;
+import static com.sillyrabbit.games.MainActivity.TAG;
 
 public class GameActivity extends ActionBarActivity {
 	private TextView loadingInfoTextView;

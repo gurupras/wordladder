@@ -1,4 +1,4 @@
-package com.games.wordladder;
+package com.sillyrabbit.games.wordladder;
 
 public enum Difficulty {
 	EASY (7, 3, 5),

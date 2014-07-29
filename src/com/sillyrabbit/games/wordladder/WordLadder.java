@@ -1,4 +1,4 @@
-package com.games.wordladder;
+package com.sillyrabbit.games.wordladder;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -13,16 +13,16 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
-import com.android_app.GameActivity;
-import com.android_app.MainActivity;
+import com.sillyrabbit.games.GameActivity;
+import com.sillyrabbit.games.MainActivity;
+import com.sillyrabbit.games.helper.TimeKeeper;
 
 import android.R;
 import android.app.Activity;
 import android.os.Handler;
 import android.util.Log;
 import android.widget.TextView;
-import test.TimeKeeper;
-import static com.android_app.MainActivity.TAG;
+import static com.sillyrabbit.games.MainActivity.TAG;
 
 public class WordLadder {
 	private Difficulty difficulty;

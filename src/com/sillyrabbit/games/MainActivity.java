@@ -1,8 +1,10 @@
-package com.android_app;
+package com.sillyrabbit.games;
 
-import com.games.wordladder.DictionaryParser;
-import com.games.wordladder.Difficulty;
-import com.games.wordladder.WordLadder;
+import com.android_app.R;
+import com.sillyrabbit.games.wordladder.DictionaryParser;
+import com.sillyrabbit.games.wordladder.DictionaryParser.DictionaryPatternException;
+import com.sillyrabbit.games.wordladder.Difficulty;
+import com.sillyrabbit.games.wordladder.WordLadder;
 
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
@@ -125,6 +127,9 @@ public class MainActivity extends ActionBarActivity {
 			loadingInfoHandle(message);
 			try {
 				DictionaryParser.init(MainActivity.this);
+			} catch(DictionaryPatternException e) {
+//				uncomment if you want parse errors
+//				Log.v(TAG, "Dictionary parsing errors :" e.getMessage());
 			} catch(Exception e) {
 				Log.e(TAG, e.getMessage());
 			} finally {

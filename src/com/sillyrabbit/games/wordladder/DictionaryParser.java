@@ -1,4 +1,4 @@
-package com.games.wordladder;
+package com.sillyrabbit.games.wordladder;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,15 +12,14 @@ import java.io.ObjectOutputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import test.TimeKeeper;
-
-import com.android_app.MainActivity;
+import com.sillyrabbit.games.MainActivity;
+import com.sillyrabbit.games.helper.TimeKeeper;
 
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.os.Environment;
 import android.util.Log;
-import static com.android_app.MainActivity.TAG;
+import static com.sillyrabbit.games.MainActivity.TAG;
 
 /**
  * Static class responsible for parsing the dictionary files and creating a {@link Dictionary} object.
@@ -50,10 +49,10 @@ public class DictionaryParser {
 		TimeKeeper tk = new TimeKeeper();
 		tk.start();
 		try {
-			boolean succeeded = Dictionary.deserialize(context, dictPath,dictionary);
+			dictionary = Dictionary.deserialize(context, dictPath);
 			DictionaryParser.dictionary = dictionary;
 			tk.stop();
-			if(succeeded) {
+			if(dictionary != null) {
 				Log.v(TAG, "Time taken to deserialize dictionary :" + tk.toString());
 				return;
 			}
@@ -72,7 +71,9 @@ public class DictionaryParser {
 				Log.v(TAG, "Opening file :" + f);
 				in = new BufferedReader(new InputStreamReader(am.open("dictionary/" + f)));			
 				String line;
+				int lineNumber = -1;
 				while((line = in.readLine()) != null) {
+					lineNumber++;
 //					Empty line..continue to the next
 					if(line.equals(""))
 						continue;
@@ -80,13 +81,13 @@ public class DictionaryParser {
 					if(!m.matches()) {
 						errorBuffer.append("Line did not match pattern\n" +
 								"File :" + f + "\n" +
-								"Line :" + line);
+								"Line :" + lineNumber);
 						continue;
 					}
 //					We have a word..add it to the dictionary
 					String word = m.group(1).toLowerCase();
 					String defn = m.group(2);
-					dictionary.put(word, defn);
+					dictionary.put(word);
 				}
 				in.close();
 			}
@@ -103,6 +104,8 @@ public class DictionaryParser {
 		tk.start();
 //		At this point, we can't fail. So set DictionaryParser.dictionary to the dictionary we just built.
 		DictionaryParser.dictionary = dictionary;
+		
+//		Serialize it so we don't have to re-parse
 		File file = new File(dictPath);
 		if(!file.exists()) {
 			if(!file.mkdirs())

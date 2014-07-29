@@ -1,6 +1,8 @@
-package com.android_app;
+package com.sillyrabbit.games;
 
 import java.io.IOException;
+
+import com.android_app.R;
 
 import android.content.Context;
 import android.media.MediaPlayer;

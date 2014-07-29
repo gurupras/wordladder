@@ -4,5 +4,5 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:configChanges="keyboardHidden|orientation"
-    tools:context="com.android_app.MainActivity"
+    tools:context="com.sillyrabbit.games.MainActivity"
     tools:ignore="MergeRootFrame" />

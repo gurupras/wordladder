@@ -3,7 +3,7 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.android_app.GameActivity"
+    tools:context="com.sillyrabbit.games.GameActivity"
     android:configChanges="keyboardHidden|orientation"
     tools:ignore="MergeRootFrame" />
 
