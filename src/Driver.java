@@ -24,7 +24,6 @@ import com.games.wordladder.WordLadder;
 
 public class Driver {
 	private static final String OUTPUT_PATH = "wordladder.bin";
-	private static final int THREADS_PER_DIFFICULTY = 2;
 	
 	private static Map<Difficulty, Set<String>> wordLadderMaps = new HashMap<Difficulty, Set<String>>();
 	private static List<WorkerThread> threads;
@@ -40,6 +39,14 @@ public class Driver {
 			wordLadderMaps.put(d, s);
 		}
 		
+		for(Difficulty d : Difficulty.values()) {
+			for(int idx = 0; idx < d.getMinSteps() / 3; idx++) {
+				WorkerThread thread = new WorkerThread(d);
+				thread.setName(d + "->" + "thread-" + idx);
+				threads.add(thread);
+			}
+		}
+		
 		ConsoleThread consoleThread = new ConsoleThread();
 		
 		try {
@@ -53,32 +60,55 @@ public class Driver {
 		}
 	}
 	
+	private static void pauseThreads() throws InterruptedException {
+		for(WorkerThread thread : threads) {
+			synchronized(thread) {
+				thread.setPaused(true);
+			}
+		}
+	}
+	
+	private static void resumeThreads() throws IllegalMonitorStateException {
+		for(WorkerThread thread : threads) {
+			synchronized(thread) {
+				thread.setPaused(false);
+				thread.notify();
+			}
+		}
+	}
 	
 	private static class ConsoleThread extends Thread implements Runnable {
 		private enum Command {
 			HELP,
+			START,
+			STOP,
+			RESUME,
 			STATUS,
 			DUMP,
 			RESTORE,
-			START,
+			CLEAR,
+			EXIT,
 		}
 		private final String[][] commands = {
 				{"help", "h"},
+				{"start"},
+				{"pause", "stop"},
+				{"resume", "continue"},
 				{"status", "info"},
 				{"dump", "serialize"},
 				{"restore", "deserialize"},
-				{"start"},
+				{"clear", "reset"},
+				{"exit"},
 		};
 		
 		private Map<Command, List<String>> commandMap;
 		
 		public ConsoleThread() {
 			commandMap = new HashMap<Command, List<String>>();
-			commandMap.put(Command.HELP, Arrays.asList(commands[0]));
-			commandMap.put(Command.STATUS, Arrays.asList(commands[1]));
-			commandMap.put(Command.DUMP, Arrays.asList(commands[2]));
-			commandMap.put(Command.RESTORE, Arrays.asList(commands[3]));
-			commandMap.put(Command.START, Arrays.asList(commands[4]));
+			for(Command c : Command.values()) {
+				int idx = Arrays.asList(Command.values()).indexOf(c);
+				commandMap.put(c, Arrays.asList(commands[idx]));
+			}
 		}
 		
 		@Override
@@ -115,6 +145,15 @@ public class Driver {
 				case HELP:
 					help();
 					break;
+				case START:
+					startThreads();
+					break;
+				case STOP:
+					stopThreads(command);
+					break;
+				case RESUME:
+					resumeThreads(command);
+					break;
 				case STATUS:
 					status();
 					break;
@@ -124,26 +163,14 @@ public class Driver {
 				case RESTORE:
 					restore();
 					break;
-				case START:
-					startThreads();
+				case CLEAR:
+					clearMap();
 					break;
-				}
-			}
-		}
-		
-		private void pauseThreads() throws InterruptedException {
-			for(WorkerThread thread : threads) {
-				synchronized(thread.getPaused()) {
-					thread.setPaused(true);
-				}
-			}
-		}
-		
-		private void resumeThreads() throws IllegalMonitorStateException {
-			for(WorkerThread thread : threads) {
-				synchronized(thread.getPaused()) {
-					thread.setPaused(true);
-					thread.getPaused().notify();
+				case EXIT:
+					exit();
+					break;
+				default:
+					throw new IllegalStateException("Unimplemented command :" + command);
 				}
 			}
 		}
@@ -155,28 +182,23 @@ public class Driver {
 		}
 		
 		private void status() {
-			try {
-				pauseThreads();
-			} catch(Exception e) {
-				System.err.println(Command.STATUS + ":" + "Caught exception while pausing threads :" + e.getMessage());
+//			XXX: Assumption: If one thread is running, all threads are running
+			boolean isPaused = threads.get(0).isPaused;
+			
+			if(stopThreads(Command.STATUS))
 				return;
-			}
 			for(Difficulty d : wordLadderMaps.keySet())
 				System.out.println(d + " :" + wordLadderMaps.get(d).size());
-			try {
-				resumeThreads();
-			} catch(IllegalMonitorStateException e) {
-				System.err.println(Command.STATUS + ":" + "Caught exception while resuming threads :" + e.getMessage());
-			}
+			if(!isPaused)
+				resumeThreads(Command.STATUS);
 		}
 		
 		private void dump() {
-			try {
-				pauseThreads();
-			} catch(Exception e) {
-				System.err.println(Command.DUMP + ":" + "Caught exception while pausing threads:" + e.getMessage());
+//			XXX: Assumption: If one thread is running, all threads are running
+			boolean isPaused = threads.get(0).isPaused;
+			
+			if(stopThreads(Command.DUMP))
 				return;
-			}
 			
 			File file = new File(Driver.OUTPUT_PATH);
 			ObjectOutputStream out = null;
@@ -190,19 +212,16 @@ public class Driver {
 			} finally {
 				try { out.close(); } catch(Exception e) {}
 			}
-			try {
-				resumeThreads();
-			} catch(IllegalMonitorStateException e) {
-				System.err.println(Command.DUMP + ":" + "Caught exception while resuming threads :" + e.getMessage());
-			}
+			if(!isPaused)
+				resumeThreads(Command.STATUS);
 		}
 	
 		private void restore() {
-			try {
-				pauseThreads();
-			} catch(Exception e) {
-				System.err.println(Command.STATUS + ":" + "Caught exception while pausing threads :" + e.getMessage());
-			}
+//			XXX: Assumption: If one thread is running, all threads are running
+			boolean isPaused = threads.get(0).isPaused;
+			
+			if(stopThreads(Command.RESTORE))
+				return;
 
 			File file = new File(Driver.OUTPUT_PATH);
 			ObjectInputStream out = null;
@@ -218,23 +237,61 @@ public class Driver {
 			} finally {
 				try { out.close(); } catch(Exception e) {}
 			}
-			
-			try {
-				resumeThreads();
-			} catch(IllegalMonitorStateException e) {
-				System.err.println(Command.STATUS + ":" + "Caught exception while resuming threads :" + e.getMessage());
-			}
+			if(!isPaused)
+				resumeThreads(Command.STATUS);
 		}
 		
 		private void startThreads() {
-			for(Difficulty d : Difficulty.values()) {
-				for(int idx = 0; idx < Driver.THREADS_PER_DIFFICULTY; idx++) {
-					WorkerThread thread = new WorkerThread(d);
-					thread.setName(d + "->" + "thread-" + idx);
-					threads.add(thread);
-					thread.start();
-				}
+			int size = 0;
+			for(Map.Entry<Difficulty, Set<String>> entry : wordLadderMaps.entrySet()) {
+				Set<String> value = entry.getValue();
+				size = size > value.size() ? size : value.size();
 			}
+			if(size > 0)
+				System.err.println("Warning: Using existing pre-loaded map");
+			
+			for(WorkerThread thread : threads) {
+				thread.start();
+			}
+		}
+		
+		private boolean stopThreads(Command command) {
+			try {
+				pauseThreads();
+			} catch (InterruptedException e) {
+				System.err.println(command + ":" + "Caught exception while pausing threads :" + e.getMessage());
+				return true;
+			}
+			return false;
+		}
+		
+		private boolean resumeThreads(Command command) {
+			try {
+				Driver.resumeThreads();
+			} catch(IllegalMonitorStateException e) {
+				System.err.println(command + ":" + "Caught exception while resuming threads :" + e.getMessage());
+				return true;
+			}
+			return false;
+		}
+
+		private void clearMap() {
+//			XXX: Assumption: If one thread is running, all threads are running
+			boolean isPaused = threads.get(0).isPaused;
+			
+			if(stopThreads(Command.CLEAR))
+				return;
+			wordLadderMaps.clear();
+			if(!isPaused)
+				resumeThreads(Command.CLEAR);
+		}
+		
+		private void exit() {
+//			We dump anyway just to be safe
+			if(!stopThreads(Command.EXIT))
+				dump();
+			
+			System.exit(-1);
 		}
 	}
 	
@@ -249,7 +306,11 @@ public class Driver {
 			this.setPriority((MAX_PRIORITY - MIN_PRIORITY) / 2);
 		}
 		
-		public Boolean getPaused() {
+		public synchronized void setPaused(boolean b) {
+			this.isPaused = b;
+		}
+
+		public synchronized Boolean getPaused() {
 			return isPaused;
 		}
 
@@ -258,21 +319,18 @@ public class Driver {
 			System.out.println("Started thread :" + getName());
 			while(true) {
 				try {
-					synchronized(isPaused) {
+					synchronized(this) {
 						if(isPaused)
-							isPaused.wait();
+							this.wait();
 					}
-					WordLadder l = new WordLadder(difficulty);
-					wordLadderSet.add(l.origin() + "->" + l.destination());
+					
+					WordLadder wl = new WordLadder(difficulty);
+					wordLadderSet.add(wl.origin() + "--" + wl.destination() + ":" + wl.getPath());
 				} catch(Exception e) {
 					e.printStackTrace();
 					return;
 				}
 			}
-		}
-		
-		public void setPaused(boolean value) {
-			this.isPaused = value;
 		}
 	}
 }
