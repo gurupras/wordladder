@@ -1,14 +1,19 @@
 package com.server;
 
 import java.io.BufferedReader;
+import java.io.PrintWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.Socket;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +27,8 @@ import static com.server.Driver.wordLadderMaps;
 import com.games.wordladder.Difficulty;
 
 public class ConsoleThread extends Thread implements Runnable {
+	private Socket socket;
+	
 	private enum Command {
 		HELP,
 		START,
@@ -47,7 +54,8 @@ public class ConsoleThread extends Thread implements Runnable {
 	
 	private Map<Command, List<String>> commandMap;
 	
-	public ConsoleThread() {
+	public ConsoleThread(Socket socket) {
+		this.socket = socket;
 		commandMap = new HashMap<Command, List<String>>();
 		for(Command c : Command.values()) {
 			int idx = Arrays.asList(Command.values()).indexOf(c);
@@ -57,20 +65,24 @@ public class ConsoleThread extends Thread implements Runnable {
 	
 	@Override
 	public void run() {
-		while(true) {
-			System.out.print(">");
-			String command = "";
-			BufferedReader in = null;
-			try {
-				in = new BufferedReader(new InputStreamReader(System.in));
-				command = in.readLine();
-				if(command.equals(""))
-					continue;
+		BufferedReader in = null;
+		try {
+			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			while(true) {
+				String command = "";
+				while(true) {
+					command = in.readLine();
+					if(command == null || command.equals("")) {
+						Thread.sleep(50);
+						continue;
+					}
+					else
+						break;
+				}
 				handle(command);
-				Thread.sleep(50);
-			} catch(Exception e) {
-				System.err.println("Caught console exception :" + e.getMessage() + "\n");
 			}
+		} catch(Exception e) {
+			System.err.println("Caught console exception :" + e.getMessage() + "\n");
 		}
 	}
 	
@@ -82,7 +94,7 @@ public class ConsoleThread extends Thread implements Runnable {
 				command = entry.getKey();
 		}
 		if(command == null) {
-			System.err.println("Invalid command :" + cmdString);
+			sendMessage_ln("Invalid command :" + cmdString);
 			help();
 		}
 		else {
@@ -120,9 +132,31 @@ public class ConsoleThread extends Thread implements Runnable {
 		}
 	}
 	
+	private void sendMessage(String message) {
+		PrintWriter out = null;
+		try {
+			out = new PrintWriter(socket.getOutputStream(), true);
+			out.print(message);
+		} catch(Exception e) {
+			System.err.println("Caught exception while sending message :" + e.getMessage());
+			e.printStackTrace();
+		}
+	}
+	
+	private void sendMessage_ln(String message) {
+		PrintWriter out = null;
+		try {
+			out = new PrintWriter(socket.getOutputStream(), true);
+			out.println(message);
+		} catch(Exception e) {
+			System.err.println("Caught exception while sending message :" + e.getMessage());
+			e.printStackTrace();
+		}
+	}
+	
 	private void help() {
 		for(Map.Entry<Command, List<String>> entry : commandMap.entrySet()) {
-			System.err.println(entry.getValue());
+			sendMessage_ln("" + entry.getValue());
 		}
 	}
 	
@@ -133,7 +167,7 @@ public class ConsoleThread extends Thread implements Runnable {
 		if(stopThreads(Command.STATUS))
 			return;
 		for(Difficulty d : wordLadderMaps.keySet())
-			System.out.println(d + " :" + wordLadderMaps.get(d).size());
+			sendMessage_ln(d + " :" + wordLadderMaps.get(d).size());
 		if(!isPaused)
 			resumeThreads(Command.STATUS);
 	}
@@ -193,7 +227,7 @@ public class ConsoleThread extends Thread implements Runnable {
 			size = size > value.size() ? size : value.size();
 		}
 		if(size > 0)
-			System.err.println("Warning: Using existing pre-loaded map");
+			sendMessage_ln("Warning: Using existing pre-loaded map");
 		
 		for(WorkerThread thread : threads) {
 			thread.start();
@@ -235,10 +269,9 @@ public class ConsoleThread extends Thread implements Runnable {
 	}
 	
 	private void exit() {
-//		We dump anyway just to be safe
-		if(!stopThreads(Command.EXIT))
-			dump();
-		
-		System.exit(-1);
+		try {
+			socket.close();
+		} catch (IOException e) {
+		}
 	}
 }

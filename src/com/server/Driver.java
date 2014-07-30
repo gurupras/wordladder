@@ -49,12 +49,13 @@ public class Driver {
 			threads.add(thread);
 		}
 		
-		ConsoleThread consoleThread = new ConsoleThread();
+		ServerThread serverThread = new ServerThread();
 		
 		try {
 			DictionaryParser.init();
-			consoleThread.start();
-			consoleThread.join();
+			
+			serverThread.start();
+			serverThread.join();
 		} catch(DictionaryPatternException e) {
 		} catch(Exception e) {
 			System.err.println(e.getMessage());
