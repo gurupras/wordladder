@@ -1,9 +1,9 @@
 package com.games.wordladder;
 
 public enum Difficulty {
-	EASY (7, 3, 5),
-	MEDIUM (9, 6, 10),
-	HARD (15, 9, 10),
+	EASY (6, 4, 10),
+	MEDIUM (9, 7, 10),
+	HARD (20, 10, 10),
 	;
 	
 	private int maxSteps;

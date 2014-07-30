@@ -2,6 +2,12 @@ package test.wordladder;
 
 import static org.junit.Assert.*;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -103,5 +109,23 @@ public class WordLadderTest {
 		}
 		localBuffer.append("\t" + errorBuffer + "\n");
 		result.append(localBuffer.toString());
+	}
+	
+	@Test
+	public void destinationTest() {
+		StringBuffer localBuffer = new StringBuffer("Average time taken to initiaze each difficulty          :");
+		StringBuffer errorBuffer = new StringBuffer();
+		boolean failed = false;
+		
+		String origin = "angry";
+		
+		Collection<String> destinations = new LinkedList<String>();
+		Map<String, Collection<String>> pathMap = new HashMap<String, Collection<String>>();
+		WordLadder.getAllDestinations(origin, Difficulty.HARD, destinations, pathMap);
+		
+		for(String destination : destinations) {
+			WordLadder wl = new WordLadder(origin, destination);
+			System.out.println(wl.getPath());
+		}
 	}
 }

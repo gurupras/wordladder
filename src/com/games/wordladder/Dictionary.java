@@ -15,8 +15,10 @@ import java.util.Random;
 import java.util.Vector;
 
 public class Dictionary extends HashMap<String, String> {
-	private static final int MAX_WORD_LENGTH = 12;
-	private static final int MIN_WORD_LENGTH = 3;
+	private static final long serialVersionUID = -6336547234958289248L;
+	
+	public static final int MAX_WORD_LENGTH = 12;
+	public static final int MIN_WORD_LENGTH = 3;
 	
 	private Map<Integer, List<String>> wordLengthMap;
 	private List<String> keys;
@@ -33,18 +35,23 @@ public class Dictionary extends HashMap<String, String> {
 	
 	public String generateWord(int maxWordLength) {
 //		XXX:We assume that there is bound to be a word of every length from MIN_WORD_LENGTH to MAX_WORD_LENGTH
+		Random random = new Random(System.nanoTime());
 		int wordLength = -1;
 		int mapSize = -1;
 		while(mapSize <= 0) {
-			wordLength			= MIN_WORD_LENGTH + (int)(Math.random() *(maxWordLength - MIN_WORD_LENGTH + 1));
+			wordLength			= MIN_WORD_LENGTH + (int)(random.nextDouble() *(maxWordLength - MIN_WORD_LENGTH + 1));
 			List<String> list	= wordLengthMap.get(wordLength);
 			if(list != null)
 				mapSize				= list.size();
 		}
 		
-		int randomIndex = 0 + (int)(Math.random() *mapSize);
+		int randomIndex = 0 + (int)(random.nextDouble() * mapSize);
 		
 		return wordLengthMap.get(wordLength).get(randomIndex);
+	}
+	
+	public Map<Integer, List<String>> getWordLengthMap() {
+		return wordLengthMap;
 	}
 	
 	@Override

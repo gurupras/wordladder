@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Random;
 import java.util.Set;
 
 public class WordLadder {
@@ -39,9 +40,18 @@ public class WordLadder {
 			getDestinations(origin, difficulty, destinationList, pathMap);
 		}
 		
-		int randomIndex		= (int) (0 + Math.random() * destinationList.size());
+		Random random = new Random(System.nanoTime());
+		int randomIndex		= (int) (0 + random.nextDouble() * destinationList.size());
 		this.destination	= (String) destinationList.toArray()[randomIndex];
 		
+	}
+	
+	public static Collection<String> getAllDestinations(String origin, Difficulty difficulty, 
+			Collection<String> destinations, Map<String, Collection<String>> pathMap) {
+		WordLadder wl = new WordLadder(origin, null);
+		
+		wl.getDestinations(origin, difficulty, destinations, pathMap);
+		return destinations;
 	}
 	
 	public WordLadder(String origin, String destination) {
@@ -152,10 +162,7 @@ public class WordLadder {
 				list.add(word);
 				pathMap.put(s, list);
 			}
-			if(stepsTaken == difficulty.getMaxSteps()) {
-				break;
-			}
-			if(stepsTaken == difficulty.getMaxSteps()) {
+			if(stepsTaken > difficulty.getMaxSteps()) {
 				break;
 			}
 		}
