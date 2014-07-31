@@ -25,8 +25,11 @@ import static com.server.Driver.threads;
 import static com.server.Driver.wordLadderMaps;
 
 import com.games.wordladder.Difficulty;
+import com.logger.Log;
 
 public class ConsoleThread extends Thread implements Runnable {
+	private String TAG = "ConsoleThread";
+	
 	private Socket socket;
 	
 	private enum Command {
@@ -61,10 +64,13 @@ public class ConsoleThread extends Thread implements Runnable {
 			int idx = Arrays.asList(Command.values()).indexOf(c);
 			commandMap.put(c, Arrays.asList(commands[idx]));
 		}
+		TAG += "->" + socket.getInetAddress().getHostAddress();
 	}
 	
 	@Override
 	public void run() {
+		Log.i(TAG, "Started Console thread for :" + socket.getInetAddress().getHostAddress());
+		
 		BufferedReader in = null;
 		try {
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -79,10 +85,11 @@ public class ConsoleThread extends Thread implements Runnable {
 					else
 						break;
 				}
+				Log.d(TAG, "Received command :" + command);
 				handle(command);
 			}
 		} catch(Exception e) {
-			System.err.println("Caught console exception :" + e.getMessage() + "\n");
+			Log.e(TAG, "Caught console exception :" + e.getMessage() + "\n");
 		}
 	}
 	
@@ -133,6 +140,8 @@ public class ConsoleThread extends Thread implements Runnable {
 	}
 	
 	private void sendMessage(String message) {
+		Log.d(TAG, "Attempting to send message :" + message);
+		
 		PrintWriter out = null;
 		try {
 			out = new PrintWriter(socket.getOutputStream(), true);
@@ -144,12 +153,14 @@ public class ConsoleThread extends Thread implements Runnable {
 	}
 	
 	private void sendMessage_ln(String message) {
+		Log.d(TAG, "Attempting to send message :" + message);
+		
 		PrintWriter out = null;
 		try {
 			out = new PrintWriter(socket.getOutputStream(), true);
 			out.println(message);
 		} catch(Exception e) {
-			System.err.println("Caught exception while sending message :" + e.getMessage());
+			Log.e(TAG, "Caught exception while sending message :" + e.getMessage());
 			e.printStackTrace();
 		}
 	}
@@ -241,7 +252,7 @@ public class ConsoleThread extends Thread implements Runnable {
 		try {
 			Driver.pauseThreads();
 		} catch (InterruptedException e) {
-			System.err.println(command + ":" + "Caught exception while pausing threads :" + e.getMessage());
+			Log.e(TAG, command + ":" + "Caught exception while pausing threads :" + e.getMessage());
 			return true;
 		}
 		return false;
@@ -251,7 +262,7 @@ public class ConsoleThread extends Thread implements Runnable {
 		try {
 			Driver.resumeThreads();
 		} catch(IllegalMonitorStateException e) {
-			System.err.println(command + ":" + "Caught exception while resuming threads :" + e.getMessage());
+			Log.e(TAG, command + ":" + "Caught exception while resuming threads :" + e.getMessage());
 			return true;
 		}
 		return false;

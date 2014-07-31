@@ -8,8 +8,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.logger.Log;
+
 public class ServerThread extends Thread implements Runnable {
 	public static final int SERVER_PORT = 9091;
+	public static final String TAG = "ServerThread";
 	
 	private Map<Socket, ConsoleThread> connections;
 	
@@ -22,16 +25,21 @@ public class ServerThread extends Thread implements Runnable {
 		ServerSocket serverSocket = null;
 		try {
 			serverSocket = new ServerSocket(SERVER_PORT);
+			Log.i(TAG, "Created server socket");
 			serverSocket.setReuseAddress(true);
+			Log.i(TAG,  "Successfully set reuseAddr");
 		} catch (IOException e) {
 			System.err.println("Error in initializing server socket :" + e.getMessage());
 			return;
 		}
 		try {
+			Log.d(TAG, "Listening for connections");
 			while(true) {
 				Socket socket = serverSocket.accept();
+				Log.d(TAG, "Received connection from :" + socket.getInetAddress().getHostAddress());
 				ConsoleThread consoleThread = new ConsoleThread(socket);
 				connections.put(socket, consoleThread);
+				
 				consoleThread.start();
 			}
 		} catch (Exception e) {

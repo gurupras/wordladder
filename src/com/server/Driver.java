@@ -24,15 +24,24 @@ import com.games.wordladder.DictionaryParser;
 import com.games.wordladder.DictionaryParser.DictionaryPatternException;
 import com.games.wordladder.Difficulty;
 import com.games.wordladder.WordLadder;
+import com.logger.Log;
 
 
 public class Driver {
+	private static final String TAG = "Server Driver";
 	protected static final String OUTPUT_PATH = "wordladder.bin";
 	
 	protected static Map<Difficulty, Set<String>> wordLadderMaps = new HashMap<Difficulty, Set<String>>();
 	protected static List<WorkerThread> threads;
 	
 	public static void main(String[] args) {
+		try {
+			Log.init(Log.STDOUT);
+		} catch (IOException e1) {
+			System.err.println("Unable to initialize logger");
+			return;
+		}
+		
 		threads = new ArrayList<WorkerThread>();
 		
 		wordLadderMaps = new HashMap<Difficulty, Set<String>>();
@@ -52,13 +61,15 @@ public class Driver {
 		ServerThread serverThread = new ServerThread();
 		
 		try {
+			Log.v(TAG, "Initializing dictionary");
 			DictionaryParser.init();
+			Log.v(TAG, "Finished initializing dictionary");
 			
 			serverThread.start();
 			serverThread.join();
 		} catch(DictionaryPatternException e) {
 		} catch(Exception e) {
-			System.err.println(e.getMessage());
+			Log.e(TAG, e.getMessage());
 			e.printStackTrace();
 		}
 	}
