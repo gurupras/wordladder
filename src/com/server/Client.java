@@ -15,8 +15,7 @@ public class Client {
 	private static final Object messenger = new Object();
 	private static final String IP_ADDRESS = "127.0.0.1";
 
-	@Test
-	public void main() {
+	public static void main(String[] args) {
 		SenderThread senderThread = null;
 		ReceiverThread receiverThread = null;
 		Socket socket = null;
@@ -54,6 +53,7 @@ public class Client {
 				BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
 				while(true) {
 					String command = null;
+					System.out.print(">");
 					command = input.readLine();
 					sockOutput.println(command);
 					synchronized(messenger) {
