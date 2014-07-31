@@ -7,12 +7,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -20,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static com.server.Driver.OUTPUT_PATH;
 import static com.server.Driver.threads;
 import static com.server.Driver.wordLadderMaps;
 
@@ -136,19 +132,6 @@ public class ConsoleThread extends Thread implements Runnable {
 			default:
 				throw new IllegalStateException("Unimplemented command :" + command);
 			}
-		}
-	}
-	
-	private void sendMessage(String message) {
-		Log.d(TAG, "Attempting to send message :" + message);
-		
-		PrintWriter out = null;
-		try {
-			out = new PrintWriter(socket.getOutputStream(), true);
-			out.print(message);
-		} catch(Exception e) {
-			System.err.println("Caught exception while sending message :" + e.getMessage());
-			e.printStackTrace();
 		}
 	}
 	
