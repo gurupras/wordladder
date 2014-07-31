@@ -10,6 +10,7 @@ import com.games.wordladder.Dictionary;
 import com.games.wordladder.DictionaryParser;
 import com.games.wordladder.Difficulty;
 import com.games.wordladder.WordLadder;
+import com.logger.Log;
 
 import static com.server.Driver.wordLadderMaps;
 
@@ -40,6 +41,13 @@ public class WorkerThread extends Thread implements Runnable {
 		for(int len = Dictionary.MIN_WORD_LENGTH; len <= difficulty.getMaxWordLength(); len++) {
 			for(String origin : dictionary.getWordLengthMap().get(len)) {
 				try {
+					synchronized(this) {
+						if(isPaused) {
+							Log.d(getName(), "Paused");
+							this.wait();
+							Log.d(getName(), "Resumed");
+						}
+					}
 					Collection<String> destinations = new LinkedList<String>();
 					Map<String, Collection<String>> pathMap = new HashMap<String, Collection<String>>();
 					WordLadder.getAllDestinations(origin, difficulty, destinations, pathMap);

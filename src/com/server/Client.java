@@ -9,10 +9,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import org.junit.Test;
-
 public class Client {
-	private static final Object messenger = new Object();
 	private static final String IP_ADDRESS = "127.0.0.1";
 
 	public static void main(String[] args) {

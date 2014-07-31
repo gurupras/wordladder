@@ -157,19 +157,24 @@ public class ConsoleThread extends Thread implements Runnable {
 	}
 	
 	private void help() {
-		for(Map.Entry<Command, List<String>> entry : commandMap.entrySet()) {
-			sendMessage_ln("" + entry.getValue());
-		}
+		StringBuilder sb = new StringBuilder();
+		for(Map.Entry<Command, List<String>> entry : commandMap.entrySet())
+			sb.append("" + entry.getValue() + "\n");
+		sendMessage_ln(sb.toString());
 	}
 	
 	private void status() {
 //		XXX: Assumption: If one thread is running, all threads are running
 		boolean isPaused = threads.get(0).getPaused();
+		StringBuilder sb = new StringBuilder();
 		
-		if(stopThreads(Command.STATUS))
+		if(stopThreads(Command.STATUS)) {
+			Log.e(TAG, "Command :" + Command.STATUS + " :Stop threads failed");
 			return;
+		}
 		for(Difficulty d : wordLadderMaps.keySet())
-			sendMessage_ln(d + " :" + wordLadderMaps.get(d).size());
+			sb.append(d + " :" + wordLadderMaps.get(d).size() + "\n");
+		sendMessage_ln(sb.toString());
 		if(!isPaused)
 			resumeThreads(Command.STATUS);
 	}
@@ -178,8 +183,10 @@ public class ConsoleThread extends Thread implements Runnable {
 //		XXX: Assumption: If one thread is running, all threads are running
 		boolean isPaused = threads.get(0).getPaused();
 		
-		if(stopThreads(Command.DUMP))
+		if(stopThreads(Command.DUMP)) {
+			Log.e(TAG, "Command :" + Command.DUMP + " :Stop threads failed");
 			return;
+		}
 		
 		File file = new File(Driver.OUTPUT_PATH);
 		ObjectOutputStream out = null;
@@ -194,15 +201,19 @@ public class ConsoleThread extends Thread implements Runnable {
 			try { out.close(); } catch(Exception e) {}
 		}
 		if(!isPaused)
-			resumeThreads(Command.STATUS);
+			resumeThreads(Command.DUMP);
+		sendMessage_ln(Command.DUMP + " Successfully completed");
 	}
 
 	private void restore() {
 //		XXX: Assumption: If one thread is running, all threads are running
 		boolean isPaused = threads.get(0).getPaused();
 		
-		if(stopThreads(Command.RESTORE))
+		if(stopThreads(Command.RESTORE)) {
+			Log.e(TAG, "Command :" + Command.RESTORE + " :Stop threads failed");
 			return;
+		}
+			
 
 		File file = new File(Driver.OUTPUT_PATH);
 		ObjectInputStream out = null;
@@ -219,7 +230,9 @@ public class ConsoleThread extends Thread implements Runnable {
 			try { out.close(); } catch(Exception e) {}
 		}
 		if(!isPaused)
-			resumeThreads(Command.STATUS);
+			resumeThreads(Command.RESTORE);
+		
+		sendMessage_ln(Command.RESTORE + " Successfully completed");
 	}
 	
 	private void startThreads() {
@@ -237,6 +250,8 @@ public class ConsoleThread extends Thread implements Runnable {
 //		XXX: Because of the way we've implemented the waiting mechanism, we need to call resume to notify the threads
 //		Since the constructor sets isPaused to true to signal that it isn't running (yet).
 		resumeThreads(Command.START);
+		
+		sendMessage_ln(Command.START + " Successfully completed");
 	}
 	
 	private boolean stopThreads(Command command) {
@@ -246,6 +261,8 @@ public class ConsoleThread extends Thread implements Runnable {
 			Log.e(TAG, command + ":" + "Caught exception while pausing threads :" + e.getMessage());
 			return true;
 		}
+		if(command == Command.STOP)
+			sendMessage_ln(Command.STOP + " Successfully completed");
 		return false;
 	}
 	
@@ -256,6 +273,8 @@ public class ConsoleThread extends Thread implements Runnable {
 			Log.e(TAG, command + ":" + "Caught exception while resuming threads :" + e.getMessage());
 			return true;
 		}
+		if(command == Command.RESUME)
+			sendMessage_ln(Command.RESUME + " Successfully completed");
 		return false;
 	}
 
@@ -263,11 +282,16 @@ public class ConsoleThread extends Thread implements Runnable {
 //		XXX: Assumption: If one thread is running, all threads are running
 		boolean isPaused = threads.get(0).getPaused();
 		
-		if(stopThreads(Command.CLEAR))
+		if(stopThreads(Command.CLEAR)) {
+			Log.e(TAG, "Command :" + Command.CLEAR + " :Stop threads failed");
 			return;
-		wordLadderMaps.clear();
+		}
+		for(Set<String> value : wordLadderMaps.values())
+			value.clear();
 		if(!isPaused)
 			resumeThreads(Command.CLEAR);
+		
+		sendMessage_ln(Command.CLEAR + " Successfully completed");
 	}
 	
 	private void exit() {
