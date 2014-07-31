@@ -56,9 +56,8 @@ public class Client {
 					System.out.print(">");
 					command = input.readLine();
 					sockOutput.println(command);
-					synchronized(messenger) {
-//						messenger.wait();
-					}
+					if(command.equals("exit"))
+						break;
 				}
 			} catch (Exception e) {
 				System.err.println("CommunicationThread caught exception :" + e.getMessage());
@@ -81,6 +80,8 @@ public class Client {
 				BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 				String line = null;
 				while(true) {
+					if(socket.isClosed())
+						break;
 					line = input.readLine();
 					if(line == null || line == "") {
 						Thread.sleep(50);
@@ -89,11 +90,9 @@ public class Client {
 					else 
 						System.out.println(line);
 					Thread.sleep(50);
-					synchronized(messenger) {
-//						messenger.notify();
-					}
 				}
 			} catch (Exception e) {
+				if(!socket.isClosed())
 				System.err.println("ReceiverThread caught exception  :" + e.getMessage());
 				return;
 			} finally {

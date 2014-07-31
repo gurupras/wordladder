@@ -34,6 +34,7 @@ public class ServerThread extends Thread implements Runnable {
 			Log.d(TAG, "Listening for connections");
 			while(true) {
 				Socket socket = serverSocket.accept();
+				socket.setSoTimeout(500);
 				Log.d(TAG, "Received connection from :" + socket.getInetAddress().getHostAddress());
 				ConsoleThread consoleThread = new ConsoleThread(socket);
 				connections.put(socket, consoleThread);

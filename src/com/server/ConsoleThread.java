@@ -11,6 +11,8 @@ import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
+import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -60,12 +62,12 @@ public class ConsoleThread extends Thread implements Runnable {
 			int idx = Arrays.asList(Command.values()).indexOf(c);
 			commandMap.put(c, Arrays.asList(commands[idx]));
 		}
-		TAG += "->" + socket.getInetAddress().getHostAddress();
+		TAG += "->" + socket.getInetAddress().getHostAddress() + ":" + socket.getPort();
 	}
 	
 	@Override
 	public void run() {
-		Log.i(TAG, "Started Console thread for :" + socket.getInetAddress().getHostAddress());
+		Log.i(TAG, "Started Console thread");
 		
 		BufferedReader in = null;
 		try {
@@ -73,20 +75,26 @@ public class ConsoleThread extends Thread implements Runnable {
 			while(true) {
 				String command = "";
 				while(true) {
-					command = in.readLine();
-					if(command == null || command.equals("")) {
-						Thread.sleep(50);
-						continue;
+					try {
+						command = in.readLine();
+						if(command == null || command.equals("")) {
+							Thread.sleep(50);
+							continue;
+						}
+						else
+							break;
+					} catch (SocketTimeoutException e) {
 					}
-					else
-						break;
 				}
 				Log.d(TAG, "Received command :" + command);
 				handle(command);
+				if(command.equals("exit"))
+					break;
 			}
 		} catch(Exception e) {
 			Log.e(TAG, "Caught console exception :" + e.getMessage() + "\n");
 		}
+		Log.d(TAG, "Finished session");
 	}
 	
 	private synchronized void handle(String cmdString) {
@@ -263,9 +271,6 @@ public class ConsoleThread extends Thread implements Runnable {
 	}
 	
 	private void exit() {
-		try {
-			socket.close();
-		} catch (IOException e) {
-		}
+		Log.i(TAG, "Expecting client to terminate socket");
 	}
 }
