@@ -61,7 +61,7 @@ public class Driver {
 		}
 	}
 	
-	public static void pauseThreads() throws InterruptedException {
+	public synchronized static void pauseThreads() throws InterruptedException {
 		for(WorkerThread thread : threads) {
 			synchronized(thread) {
 				thread.setPaused(true);
@@ -69,7 +69,7 @@ public class Driver {
 		}
 	}
 	
-	public static void resumeThreads() throws IllegalMonitorStateException {
+	public synchronized static void resumeThreads() throws IllegalMonitorStateException {
 		for(WorkerThread thread : threads) {
 			synchronized(thread) {
 				thread.setPaused(false);
